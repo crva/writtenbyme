@@ -1,10 +1,14 @@
 .article-editor .w-md-editor {
   background: rgb(var(--tw-color-gray-900));
   height: 100% !important;
+  /* Editor border  */
+  box-shadow: none;
 }
 
 .article-editor .w-md-editor-toolbar {
   background: rgb(var(--tw-color-gray-800));
+  /* Toolbar bottom border  */
+  border-bottom: 1px solid var(--border);
 }
 
 .article-editor .w-md-editor-toolbar button {
@@ -14,6 +18,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.article-editor .w-md-editor-preview {
+  /* Middle border between markdown and preview  */
+  box-shadow: inset 1px 0 0 0 var(--border);
 }
 
 .article-editor .w-md-editor-toolbar button:hover {

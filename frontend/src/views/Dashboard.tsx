@@ -37,7 +37,7 @@ export default function Dashboard() {
   return (
     <SidebarProvider>
       <AppSidebar articles={articles} />
-      <main className="h-screen w-screen p-4">
+      <main className="h-screen w-screen p-2.5">
         <ArticleEditor
           article={selectedArticle}
           onContentChange={updateArticleContent}
