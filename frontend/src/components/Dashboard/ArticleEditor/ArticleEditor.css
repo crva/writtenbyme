@@ -1,0 +1,34 @@
+.article-editor .w-md-editor {
+  background: rgb(var(--tw-color-gray-900));
+  height: 100% !important;
+}
+
+.article-editor .w-md-editor-toolbar {
+  background: rgb(var(--tw-color-gray-800));
+}
+
+.article-editor .w-md-editor-toolbar button {
+  color: rgb(var(--tw-color-gray-300));
+  width: 32px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.article-editor .w-md-editor-toolbar button:hover {
+  color: var(--primary);
+}
+
+.article-editor .w-md-editor-toolbar li.active > button {
+  color: var(--primary);
+}
+
+.article-editor .w-md-editor-toolbar button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.article-editor .wmde-markdown {
+  background: rgb(var(--tw-color-gray-900));
+}
