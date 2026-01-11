@@ -7,18 +7,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import type { Article } from "@/types/article";
 import { Badge } from "lucide-react";
 import { Link } from "react-router";
 import SidebarArticles from "./components/SidebarArticles";
 import SidebarUser from "./components/SidebarUser";
 
-type Props = {
-  articles: Article[];
-  addArticle: () => void;
-};
-
-export default function AppSidebar({ articles, addArticle }: Props) {
+export default function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="border-b">
@@ -37,7 +31,7 @@ export default function AppSidebar({ articles, addArticle }: Props) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarArticles articles={articles} addArticle={addArticle} />
+        <SidebarArticles />
       </SidebarContent>
       <SidebarFooter>
         <SidebarUser />
