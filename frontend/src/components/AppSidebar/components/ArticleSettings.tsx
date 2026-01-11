@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useArticle } from "@/stores/articleStore";
-import { Check, Ellipsis, Pen, Trash2, X } from "lucide-react";
+import { Check, Ellipsis, ExternalLink, Pen, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import ArticleRenameDialog from "./ArticleRenameDialog";
 
@@ -22,10 +22,12 @@ export default function ArticleSettings({ articleId }: Props) {
     discardChanges,
     unsavedChanges,
     selectedArticleId,
+    articles,
   } = useArticle();
 
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
 
+  const article = articles.find((a) => a.id === articleId);
   const hasUnsavedChanges = unsavedChanges[articleId] !== undefined;
   const isCurrentlySelected = selectedArticleId === articleId;
 
@@ -39,6 +41,12 @@ export default function ArticleSettings({ articleId }: Props) {
 
   const handleDelete = () => {
     removeArticle(articleId);
+  };
+
+  const handleView = () => {
+    if (article) {
+      window.open(`/{user}/${encodeURIComponent(article.title)}`, "_blank");
+    }
   };
 
   return (
@@ -64,6 +72,10 @@ export default function ArticleSettings({ articleId }: Props) {
             <DropdownMenuSeparator />
           </>
         )}
+        <DropdownMenuItem onClick={handleView}>
+          <ExternalLink className="size-4" />
+          View
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setRenameDialogOpen(true)}>
           <Pen className="size-4" />
           Rename
