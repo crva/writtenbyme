@@ -9,6 +9,7 @@ import {
 import { useArticle } from "@/stores/articleStore";
 import { Newspaper, PlusCircle } from "lucide-react";
 import ArticleSettings from "./ArticleSettings";
+import ArticleTitle from "./ArticleTitle";
 
 export default function SidebarArticles() {
   const { articles, addArticle, selectedArticleId, setSelectedArticle } =
@@ -39,14 +40,14 @@ export default function SidebarArticles() {
             <SidebarMenuItem key={article.id}>
               <SidebarMenuButton asChild>
                 <div
-                  className={`flex justify-between items-center cursor-pointer ${
+                  className={`flex justify-between items-center cursor-pointer gap-2 ${
                     selectedArticleId === article.id ? "bg-primary" : null
                   }`}
                   onClick={() => handleArticleSelect(article.id)}
                 >
-                  <div className="flex justify-center items-center gap-2">
-                    <Newspaper className="size-4" />
-                    <span>{article.title}</span>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Newspaper className="size-4 shrink-0" />
+                    <ArticleTitle title={article.title} />
                   </div>
                   <ArticleSettings articleId={article.id} />
                 </div>

@@ -15,8 +15,6 @@ import {
 } from "@/components/ui/sidebar";
 import { CreditCard, EllipsisVertical, LogOut, UserCircle } from "lucide-react";
 
-// type Props = {};
-
 const user = {
   name: "Valentin",
   avatar: "https://miro.medium.com/max/256/0*8WdBp_k4REJoMkfF.png",
