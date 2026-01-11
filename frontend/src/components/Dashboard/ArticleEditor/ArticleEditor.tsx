@@ -1,6 +1,6 @@
+import type { Article } from "@/types/article";
 import MDEditor from "@uiw/react-md-editor";
 import "./ArticleEditor.css";
-import type { Article } from "@/types/article";
 
 type Props = {
   article: Article;

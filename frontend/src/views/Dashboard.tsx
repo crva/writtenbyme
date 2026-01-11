@@ -1,9 +1,9 @@
-import AppSidebar from "@/components/Dashboard/AppSidebar";
+import AppSidebar from "@/components/AppSidebar/AppSidebar";
 import ArticleEditor from "@/components/Dashboard/ArticleEditor/ArticleEditor";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import type { Article } from "@/types/article";
-import { useSearchParams } from "react-router";
 import { useState } from "react";
+import { useSearchParams } from "react-router";
 
 export default function Dashboard() {
   const [articles, setArticles] = useState<Article[]>([
@@ -23,6 +23,19 @@ export default function Dashboard() {
   const selectedArticleId = Number(searchParams.get("article"));
   const selectedArticle = articles[selectedArticleId];
 
+  const addArticle = () => {
+    setArticles((prevArticles) => {
+      return [
+        ...prevArticles,
+        {
+          id: prevArticles[prevArticles.length - 1].id + 1,
+          title: "New article",
+          content: "",
+        },
+      ];
+    });
+  };
+
   const updateArticleContent = (val: string) => {
     setArticles((prevArticles) => {
       const updatedArticles = [...prevArticles];
@@ -36,12 +49,14 @@ export default function Dashboard() {
 
   return (
     <SidebarProvider>
-      <AppSidebar articles={articles} />
+      <AppSidebar articles={articles} addArticle={addArticle} />
       <main className="h-screen w-screen p-2.5">
-        <ArticleEditor
-          article={selectedArticle}
-          onContentChange={updateArticleContent}
-        />
+        {selectedArticle && (
+          <ArticleEditor
+            article={selectedArticle}
+            onContentChange={updateArticleContent}
+          />
+        )}
       </main>
     </SidebarProvider>
   );
