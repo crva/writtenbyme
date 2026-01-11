@@ -21,7 +21,6 @@ export default function ArticleSettings({ articleId }: Props) {
     saveChanges,
     discardChanges,
     unsavedChanges,
-    selectedArticleId,
     articles,
   } = useArticle();
 
@@ -29,7 +28,6 @@ export default function ArticleSettings({ articleId }: Props) {
 
   const article = articles.find((a) => a.id === articleId);
   const hasUnsavedChanges = unsavedChanges[articleId] !== undefined;
-  const isCurrentlySelected = selectedArticleId === articleId;
 
   const handleSave = () => {
     saveChanges(articleId);
@@ -57,7 +55,7 @@ export default function ArticleSettings({ articleId }: Props) {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" side="right">
-        {isCurrentlySelected && hasUnsavedChanges && (
+        {hasUnsavedChanges && (
           <>
             <DropdownMenuGroup>
               <DropdownMenuItem onClick={handleSave}>
