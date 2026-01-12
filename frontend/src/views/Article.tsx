@@ -1,21 +1,21 @@
 import { Button } from "@/components/ui/button";
+import type { Article } from "@/types/article";
 import "@uiw/react-markdown-preview/markdown.css";
 import MDEditor from "@uiw/react-md-editor";
 import "@uiw/react-md-editor/markdown-editor.css";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 
 export default function Article() {
   const { username, articleSlug } = useParams<{
     username: string;
     articleSlug: string;
   }>();
-  const [article, setArticle] = useState<{
-    title: string;
-    content: string;
-    author: string;
-  } | null>(null);
+  const navigate = useNavigate();
+  const [article, setArticle] = useState<(Article & { author: string }) | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -77,7 +77,7 @@ export default function Article() {
           variant="ghost"
           size="sm"
           className="mb-8 -ml-2"
-          onClick={() => window.history.back()}
+          onClick={() => navigate(`/${article.author}`)}
         >
           <ArrowLeft className="h-4 w-4" />
           <p>{article.author}</p>
@@ -88,7 +88,14 @@ export default function Article() {
           <h1 className="text-4xl md:text-5xl font-bold mb-2">
             {article.title}
           </h1>
-          <span>{new Date().toLocaleString()}</span>
+          <span className="text-sm text-muted">
+            Last update:{" "}
+            {new Date(article.updatedAt).toLocaleDateString("en-US", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </span>
         </div>
 
         {/* Markdown Content */}
