@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { AlertCircle } from "lucide-react";
+import { useUser } from "@/stores/userStore";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -49,17 +50,25 @@ export default function AccountLoginRegisterDialog({
   open,
   onOpenChange,
 }: Props) {
+  const {
+    register: userRegister,
+    login: userLogin,
+    isLoading,
+    error: storeError,
+    clearError,
+  } = useUser();
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [username, setUsername] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
-  const [generalError, setGeneralError] = useState("");
+
+  // Use store error directly instead of syncing to local state
+  const generalError = storeError || "";
 
   const validateForm = (): boolean => {
     setErrors({});
-    setGeneralError("");
 
     try {
       if (mode === "login") {
@@ -81,25 +90,21 @@ export default function AccountLoginRegisterDialog({
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) {
       return;
     }
 
-    if (mode === "login") {
-      console.log("Login:", { email, password });
-      // TODO: Call your login API here
-      // If login fails:
-      // setGeneralError("Invalid email or password");
-      // If successful:
-      // onOpenChange(false);
-    } else {
-      console.log("Register:", { username, email, password });
-      // TODO: Call your register API here
-      // If register fails:
-      // setGeneralError("Email already exists");
-      // If successful:
-      // onOpenChange(false);
+    try {
+      if (mode === "login") {
+        await userLogin({ email, password });
+      } else {
+        await userRegister({ username, email, password });
+      }
+      // On success, close the dialog
+      onOpenChange(false);
+    } catch (err) {
+      // Error is already set in the store
     }
   };
 
@@ -109,7 +114,7 @@ export default function AccountLoginRegisterDialog({
     setConfirmPassword("");
     setUsername("");
     setErrors({});
-    setGeneralError("");
+    clearError();
   };
 
   const handleModeChange = (newMode: Mode) => {
@@ -124,8 +129,7 @@ export default function AccountLoginRegisterDialog({
     onOpenChange(newOpen);
   };
 
-  const handleSocialLogin = (provider: string) => {
-    console.log(`Login with ${provider}`);
+  const handleSocialLogin = (_provider: string) => {
     // Handle social login logic here
   };
 
@@ -171,11 +175,12 @@ export default function AccountLoginRegisterDialog({
                   }
                 }}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") {
+                  if (e.key === "Enter" && !isLoading) {
                     handleSubmit();
                   }
                 }}
                 className={errors.username ? "border-red-500" : ""}
+                disabled={isLoading}
               />
               {errors.username && (
                 <p className="text-xs text-red-500">{errors.username}</p>
@@ -196,11 +201,12 @@ export default function AccountLoginRegisterDialog({
                 }
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
+                if (e.key === "Enter" && !isLoading) {
                   handleSubmit();
                 }
               }}
               className={errors.email ? "border-red-500" : ""}
+              disabled={isLoading}
             />
             {errors.email && (
               <p className="text-xs text-red-500">{errors.email}</p>
@@ -220,11 +226,12 @@ export default function AccountLoginRegisterDialog({
                 }
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
+                if (e.key === "Enter" && !isLoading) {
                   handleSubmit();
                 }
               }}
               className={errors.password ? "border-red-500" : ""}
+              disabled={isLoading}
             />
             {errors.password && (
               <p className="text-xs text-red-500">{errors.password}</p>
@@ -245,11 +252,12 @@ export default function AccountLoginRegisterDialog({
                   }
                 }}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") {
+                  if (e.key === "Enter" && !isLoading) {
                     handleSubmit();
                   }
                 }}
                 className={errors.confirmPassword ? "border-red-500" : ""}
+                disabled={isLoading}
               />
               {errors.confirmPassword && (
                 <p className="text-xs text-red-500">{errors.confirmPassword}</p>
@@ -258,7 +266,8 @@ export default function AccountLoginRegisterDialog({
           )}
         </div>
 
-        <Button onClick={handleSubmit} className="w-full">
+        <Button onClick={handleSubmit} className="w-full" disabled={isLoading}>
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {mode === "login" ? "Login" : "Register"}
         </Button>
 
@@ -278,6 +287,7 @@ export default function AccountLoginRegisterDialog({
             variant="outline"
             onClick={() => handleSocialLogin("Google")}
             className="w-full"
+            disabled={isLoading}
           >
             Google
           </Button>
@@ -285,6 +295,7 @@ export default function AccountLoginRegisterDialog({
             variant="outline"
             onClick={() => handleSocialLogin("Apple")}
             className="w-full"
+            disabled={isLoading}
           >
             Apple
           </Button>
@@ -292,6 +303,7 @@ export default function AccountLoginRegisterDialog({
             variant="outline"
             onClick={() => handleSocialLogin("Facebook")}
             className="w-full"
+            disabled={isLoading}
           >
             Facebook
           </Button>
@@ -305,6 +317,7 @@ export default function AccountLoginRegisterDialog({
                 <button
                   onClick={() => handleModeChange("register")}
                   className="underline text-foreground hover:text-primary"
+                  disabled={isLoading}
                 >
                   Register
                 </button>
@@ -315,6 +328,7 @@ export default function AccountLoginRegisterDialog({
                 <button
                   onClick={() => handleModeChange("login")}
                   className="underline text-foreground hover:text-primary"
+                  disabled={isLoading}
                 >
                   Login
                 </button>

@@ -3,12 +3,38 @@ import AppSidebar from "@/components/AppSidebar/AppSidebar";
 import ArticleEditor from "@/components/Dashboard/ArticleEditor/ArticleEditor";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useArticle } from "@/stores/articleStore";
-import { useState } from "react";
+import { useUser } from "@/stores/userStore";
+import { useEffect, useState } from "react";
 
 export default function Dashboard() {
-  const { articles, selectedArticleId } = useArticle();
+  const { articles, selectedArticleId, fetchArticles } = useArticle();
+  const { checkAuth, isAuthenticated } = useUser();
   const [accountLoginRegisterDialogOpen, setAccountLoginRegisterDialogOpen] =
     useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Check if user is already authenticated on mount
+  useEffect(() => {
+    const initAuth = async () => {
+      await checkAuth();
+      setIsInitialized(true);
+    };
+    initAuth();
+  }, [checkAuth]);
+
+  // Fetch articles when user becomes authenticated
+  useEffect(() => {
+    if (isInitialized && isAuthenticated) {
+      fetchArticles();
+    }
+  }, [isInitialized, isAuthenticated, fetchArticles]);
+
+  // Auto-open login dialog if user is not authenticated (after initial check)
+  useEffect(() => {
+    if (isInitialized && !isAuthenticated) {
+      setAccountLoginRegisterDialogOpen(true);
+    }
+  }, [isInitialized, isAuthenticated]);
 
   const selectedArticle =
     selectedArticleId !== null

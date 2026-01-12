@@ -15,7 +15,6 @@ export const verifyToken = async (
       .find((c) => c.trim().startsWith("authjs.session-token="));
 
     if (!sessionCookie) {
-      console.log("No session cookie found. Cookies:", cookies);
       return res.status(401).json({ error: "Unauthorized - no session" });
     }
 
@@ -31,7 +30,6 @@ export const verifyToken = async (
     });
 
     if (!session) {
-      console.log("Session not found in DB for token:", token);
       return res
         .status(401)
         .json({ error: "Unauthorized - session not found" });
@@ -49,7 +47,6 @@ export const verifyToken = async (
 
     next();
   } catch (error) {
-    console.error("Auth middleware error:", error);
     res.status(401).json({ error: "Unauthorized" });
   }
 };

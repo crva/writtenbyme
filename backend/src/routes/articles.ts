@@ -9,7 +9,8 @@ router.get("/me", verifyToken, articlesController.getMyArticles);
 router.put("/:id", verifyToken, articlesController.updateArticle);
 router.delete("/:id", verifyToken, articlesController.deleteArticle);
 
-router.get("/:username", articlesController.getUserArticles);
+// More specific routes must come before less specific ones
 router.get("/:username/:articleSlug", articlesController.getArticleBySlug);
+router.get("/:username", articlesController.getUserArticles);
 
 export default router;

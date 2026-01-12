@@ -1,12 +1,47 @@
 import { Response } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
+import { generateSlug } from "../lib/slug.js";
 import { AuthRequest } from "../types/auth.js";
 
 const articleSchema = z.object({
   title: z.string().min(1).max(255),
-  content: z.string().min(1),
+  content: z.string(),
 });
+
+/**
+ * Generate a unique slug for an article by appending a number if the slug already exists
+ */
+async function generateUniqueSlug(
+  userId: string,
+  title: string,
+  excludeId?: string
+): Promise<string> {
+  let slug = generateSlug(title);
+  let count = 1;
+  const maxAttempts = 100;
+
+  while (count < maxAttempts) {
+    const existing = await prisma.article.findFirst({
+      where: {
+        userId,
+        slug,
+        ...(excludeId ? { NOT: { id: excludeId } } : {}),
+      },
+    });
+
+    if (!existing) {
+      return slug;
+    }
+
+    // Append number to slug
+    slug = `${generateSlug(title)}-${count}`;
+    count++;
+  }
+
+  // Fallback: use timestamp
+  return `${generateSlug(title)}-${Date.now()}`;
+}
 
 export const createArticle = async (req: AuthRequest, res: Response) => {
   try {
@@ -16,20 +51,40 @@ export const createArticle = async (req: AuthRequest, res: Response) => {
 
     const data = articleSchema.parse(req.body);
 
+    // Check if title already exists for this user
+    const existingArticle = await prisma.article.findFirst({
+      where: {
+        userId: req.user.userId,
+        title: data.title,
+      },
+    });
+
+    if (existingArticle) {
+      return res
+        .status(409)
+        .json({ error: "An article with this title already exists" });
+    }
+
+    const slug = await generateUniqueSlug(req.user.userId, data.title);
+
     const article = await prisma.article.create({
       data: {
         userId: req.user.userId,
         title: data.title,
+        slug: slug,
         content: data.content,
       },
     });
 
     res.status(201).json({
-      id: article.id,
-      title: article.title,
-      content: article.content,
-      createdAt: article.createdAt.toISOString(),
-      updatedAt: article.updatedAt.toISOString(),
+      article: {
+        id: article.id,
+        title: article.title,
+        slug: article.slug,
+        content: article.content,
+        createdAt: article.createdAt.toISOString(),
+        updatedAt: article.updatedAt.toISOString(),
+      },
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -60,20 +115,26 @@ export const updateArticle = async (req: AuthRequest, res: Response) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
+    const slug = await generateUniqueSlug(req.user.userId, data.title, id);
+
     const updated = await prisma.article.update({
       where: { id },
       data: {
         title: data.title,
+        slug: slug,
         content: data.content,
       },
     });
 
     res.json({
-      id: updated.id,
-      title: updated.title,
-      content: updated.content,
-      createdAt: updated.createdAt.toISOString(),
-      updatedAt: updated.updatedAt.toISOString(),
+      article: {
+        id: updated.id,
+        title: updated.title,
+        slug: updated.slug,
+        content: updated.content,
+        createdAt: updated.createdAt.toISOString(),
+        updatedAt: updated.updatedAt.toISOString(),
+      },
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -169,9 +230,7 @@ export const getArticleBySlug = async (req: AuthRequest, res: Response) => {
     const article = await prisma.article.findFirst({
       where: {
         userId: user.id,
-        title: {
-          mode: "insensitive",
-        },
+        slug: articleSlug.toLowerCase(),
       },
     });
 
@@ -182,6 +241,7 @@ export const getArticleBySlug = async (req: AuthRequest, res: Response) => {
     res.json({
       id: article.id,
       title: article.title,
+      slug: article.slug,
       content: article.content,
       createdAt: article.createdAt.toISOString(),
       updatedAt: article.updatedAt.toISOString(),
@@ -210,6 +270,7 @@ export const getMyArticles = async (req: AuthRequest, res: Response) => {
       articles.map((article) => ({
         id: article.id,
         title: article.title,
+        slug: article.slug,
         content: article.content,
         createdAt: article.createdAt.toISOString(),
         updatedAt: article.updatedAt.toISOString(),

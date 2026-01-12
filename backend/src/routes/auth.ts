@@ -110,4 +110,58 @@ router.post("/signin", async (req: AuthRequest, res) => {
   }
 });
 
+router.get("/session", async (req: AuthRequest, res) => {
+  try {
+    const sessionToken = req.cookies["authjs.session-token"];
+
+    if (!sessionToken) {
+      return res.status(401).json({ error: "No session token found" });
+    }
+
+    const session = await prisma.session.findUnique({
+      where: { sessionToken },
+      include: { user: true },
+    });
+
+    if (!session) {
+      return res.status(401).json({ error: "Session not found" });
+    }
+
+    if (new Date(session.expires) < new Date()) {
+      // Delete expired session
+      await prisma.session.delete({ where: { sessionToken } });
+      return res.status(401).json({ error: "Session expired" });
+    }
+
+    return res.json({
+      user: {
+        id: session.user.id,
+        username: session.user.username,
+        email: session.user.email,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Session validation failed" });
+  }
+});
+
+router.post("/signout", async (req: AuthRequest, res) => {
+  try {
+    const sessionToken = req.cookies["authjs.session-token"];
+
+    if (sessionToken) {
+      // Delete the session from database
+      await prisma.session.delete({
+        where: { sessionToken },
+      });
+    }
+
+    // Clear the session cookie
+    res.clearCookie("authjs.session-token");
+    return res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: "Signout failed" });
+  }
+});
+
 export default router;

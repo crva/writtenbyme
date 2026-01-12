@@ -1,3 +1,4 @@
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,10 +10,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useArticle } from "@/stores/articleStore";
+import { AlertCircle } from "lucide-react";
 import { useState } from "react";
 
 type Props = {
-  articleId: number;
+  articleId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
@@ -22,13 +24,34 @@ export default function ArticleRenameDialog({
   open,
   onOpenChange,
 }: Props) {
-  const { articles, updateArticleTitle } = useArticle();
+  const { articles, updateArticleTitle, saveChanges } = useArticle();
   const article = articles.find((a) => a.id === articleId);
   const [newTitle, setNewTitle] = useState(article?.title || "");
+  const [error, setError] = useState<string>("");
 
-  const handleRename = () => {
-    if (newTitle.trim()) {
-      updateArticleTitle(articleId, newTitle);
+  const handleRename = async () => {
+    setError("");
+    if (!newTitle.trim()) {
+      return;
+    }
+
+    // Check if new title already exists (and is not the same article)
+    const titleExists = articles.some(
+      (a) =>
+        a.id !== articleId &&
+        a.title.toLowerCase() === newTitle.trim().toLowerCase()
+    );
+
+    if (titleExists) {
+      setError("An article with this title already exists");
+      return;
+    }
+
+    updateArticleTitle(articleId, newTitle);
+    const result = await saveChanges(articleId);
+    if (result.error) {
+      setError(result.error);
+    } else {
       onOpenChange(false);
     }
   };
@@ -36,6 +59,7 @@ export default function ArticleRenameDialog({
   const handleOpenChange = (newOpen: boolean) => {
     if (newOpen) {
       setNewTitle(article?.title || "");
+      setError("");
     }
     onOpenChange(newOpen);
   };
@@ -50,6 +74,12 @@ export default function ArticleRenameDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
           <Input
             placeholder="Article title"
             value={newTitle}

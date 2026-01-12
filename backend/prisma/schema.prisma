@@ -65,11 +65,13 @@ model Article {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   title     String
+  slug      String   // URL-friendly slug derived from title
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([userId, title])
+  @@unique([userId, slug])
   @@index([userId])
 }
 

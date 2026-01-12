@@ -14,7 +14,7 @@ createRoot(document.getElementById("root")!).render(
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/:username/:articleTitle" element={<Article />} />
+          <Route path="/:username/:articleSlug" element={<Article />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

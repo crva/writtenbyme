@@ -1,65 +1,77 @@
+import { createArticle, getMyArticles, updateArticle } from "@/lib/articleApi";
 import type { Article } from "@/types/article";
 import { create } from "zustand";
 
 type ArticleStore = {
   articles: Article[];
-  nextId: number;
-  selectedArticleId: number | null;
-  unsavedChanges: Record<number, string>;
-  originalContent: Record<number, string>;
-  addArticle: () => void;
-  removeArticle: (id: number) => void;
-  updateArticleContent: (id: number, content: string) => void;
-  updateArticleTitle: (id: number, title: string) => void;
-  setSelectedArticle: (id: number | null) => void;
-  saveChanges: (id: number) => void;
-  discardChanges: (id: number) => void;
+  selectedArticleId: string | null;
+  unsavedChanges: Record<string, string>;
+  originalContent: Record<string, string>;
+  newArticles: Set<string>; // Track temporary IDs of articles not yet saved to API
+  addArticle: (title: string) => void;
+  removeArticle: (id: string) => void;
+  updateArticleContent: (id: string, content: string) => void;
+  updateArticleTitle: (id: string, title: string) => void;
+  setSelectedArticle: (id: string | null) => void;
+  saveChanges: (id: string) => Promise<{ error?: string; success?: boolean }>;
+  discardChanges: (id: string) => void;
+  fetchArticles: () => Promise<void>;
 };
 
-export const useArticle = create<ArticleStore>((set) => ({
-  articles: [
-    {
-      id: 0,
-      title: "Lorem Ipsum",
-      content: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi eleifend purus quis magna hendrerit porta ut sed felis. Sed consectetur vehicula urna, at ullamcorper nibh fermentum nec. Praesent congue tincidunt est, id volutpat nunc. Duis dolor arcu, volutpat eget euismod a, consectetur vitae orci. Aliquam a neque nibh. Aliquam sit amet suscipit ipsum. Fusce sit amet mi turpis. Suspendisse potenti.`,
-    },
-    {
-      id: 1,
-      title: "Lorem Ipsum 2",
-      content: `bjr.`,
-    },
-  ],
-  nextId: 2,
+/**
+ * Generate a temporary ID for new articles
+ * Format: temp-{timestamp}-{random}
+ */
+function generateTempId(): string {
+  return `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+export const useArticle = create<ArticleStore>((set, get) => ({
+  articles: [],
   selectedArticleId: null,
   unsavedChanges: {},
   originalContent: {},
+  newArticles: new Set(),
 
-  addArticle: () =>
-    set((state) => ({
-      articles: [
-        ...state.articles,
-        {
-          id: state.nextId,
-          title: "New article",
-          content: "",
-        },
-      ],
-      nextId: state.nextId + 1,
-    })),
+  addArticle: (title: string) =>
+    set((state) => {
+      const tempId = generateTempId();
+      const newArticles = new Set(state.newArticles);
+      newArticles.add(tempId);
 
-  removeArticle: (id: number) =>
-    set((state) => ({
-      articles: state.articles.filter((article) => article.id !== id),
-      selectedArticleId:
-        state.selectedArticleId === id ? null : state.selectedArticleId,
-      unsavedChanges: Object.fromEntries(
-        Object.entries(state.unsavedChanges).filter(
-          ([key]) => Number(key) !== id
-        )
-      ),
-    })),
+      return {
+        articles: [
+          ...state.articles,
+          {
+            id: tempId,
+            title: title,
+            content: "",
+          },
+        ],
+        newArticles,
+      };
+    }),
 
-  updateArticleContent: (id: number, content: string) =>
+  removeArticle: (id: string) =>
+    set((state) => {
+      const newArticles = new Set(state.newArticles);
+      newArticles.delete(id);
+
+      return {
+        articles: state.articles.filter((article) => article.id !== id),
+        selectedArticleId:
+          state.selectedArticleId === id ? null : state.selectedArticleId,
+        unsavedChanges: Object.fromEntries(
+          Object.entries(state.unsavedChanges).filter(([key]) => key !== id)
+        ),
+        originalContent: Object.fromEntries(
+          Object.entries(state.originalContent).filter(([key]) => key !== id)
+        ),
+        newArticles,
+      };
+    }),
+
+  updateArticleContent: (id: string | number, content: string) =>
     set((state) => {
       const originalContent = state.originalContent[id];
       const hasOriginal = originalContent !== undefined;
@@ -81,31 +93,116 @@ export const useArticle = create<ArticleStore>((set) => ({
       };
     }),
 
-  updateArticleTitle: (id: number, title: string) =>
+  updateArticleTitle: (id: string | number, title: string) =>
     set((state) => ({
       articles: state.articles.map((article) =>
         article.id === id ? { ...article, title } : article
       ),
     })),
 
-  setSelectedArticle: (id: number | null) =>
+  setSelectedArticle: (id: string | number | null) =>
     set(() => ({
       selectedArticleId: id,
     })),
 
-  saveChanges: (id: number) =>
-    set((state) => {
-      const newChanges = { ...state.unsavedChanges };
-      const newOriginalContent = { ...state.originalContent };
-      delete newChanges[id];
-      delete newOriginalContent[id];
-      return {
-        unsavedChanges: newChanges,
-        originalContent: newOriginalContent,
-      };
-    }),
+  saveChanges: async (id: string) => {
+    try {
+      const state = get();
+      const article = state.articles.find((a) => a.id === id);
 
-  discardChanges: (id: number) =>
+      if (!article) {
+        return { error: "Article not found" };
+      }
+
+      if (state.newArticles.has(id)) {
+        // Create new article
+        const response = await createArticle({
+          title: article.title,
+          content: article.content,
+        });
+
+        // Replace temporary ID with real API ID
+        const realId = response.article.id;
+        set((currentState) => {
+          const newArticles = new Set(currentState.newArticles);
+          newArticles.delete(id);
+
+          // Replace the temporary ID with the real ID in all records
+          const updatedArticles = currentState.articles.map((a) =>
+            a.id === id
+              ? {
+                  ...a,
+                  id: realId,
+                  title: response.article.title,
+                  slug: response.article.slug,
+                  content: response.article.content,
+                }
+              : a
+          );
+
+          const updatedUnsavedChanges = Object.fromEntries(
+            Object.entries(currentState.unsavedChanges).filter(
+              ([key]) => key !== id
+            )
+          );
+
+          const updatedOriginalContent = Object.fromEntries(
+            Object.entries(currentState.originalContent).filter(
+              ([key]) => key !== id
+            )
+          );
+
+          return {
+            articles: updatedArticles,
+            selectedArticleId:
+              currentState.selectedArticleId === id
+                ? realId
+                : currentState.selectedArticleId,
+            unsavedChanges: updatedUnsavedChanges,
+            originalContent: updatedOriginalContent,
+            newArticles,
+          };
+        });
+        return { success: true };
+      } else {
+        // Update existing article
+        const response = await updateArticle(String(article.id), {
+          title: article.title,
+          content: article.content,
+        });
+
+        set((currentState) => ({
+          articles: currentState.articles.map((a) =>
+            a.id === id
+              ? {
+                  ...a,
+                  title: response.article.title,
+                  slug: response.article.slug,
+                  content: response.article.content,
+                }
+              : a
+          ),
+          unsavedChanges: Object.fromEntries(
+            Object.entries(currentState.unsavedChanges).filter(
+              ([key]) => key !== id
+            )
+          ),
+          originalContent: Object.fromEntries(
+            Object.entries(currentState.originalContent).filter(
+              ([key]) => key !== id
+            )
+          ),
+        }));
+        return { success: true };
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to save article";
+      return { error: errorMessage };
+    }
+  },
+
+  discardChanges: (id: string) =>
     set((state) => {
       const originalContent = state.originalContent[id];
       const newChanges = { ...state.unsavedChanges };
@@ -123,4 +220,35 @@ export const useArticle = create<ArticleStore>((set) => ({
         originalContent: newOriginalContent,
       };
     }),
+
+  fetchArticles: async () => {
+    try {
+      const response = await getMyArticles();
+
+      // Handle both array response and wrapped response
+      const data = Array.isArray(response) ? response : response.articles || [];
+
+      // Convert API response to Article type (keep ids as strings from API)
+      const articles: Article[] = data.map(
+        (article: {
+          id: string;
+          title: string;
+          slug?: string;
+          content: string;
+        }) => ({
+          id: article.id,
+          title: article.title,
+          slug: article.slug,
+          content: article.content,
+        })
+      );
+
+      set({
+        articles,
+        newArticles: new Set(), // Clear new articles since we just fetched from API
+      });
+    } catch (error) {
+      // Silent fail for now
+    }
+  },
 }));
