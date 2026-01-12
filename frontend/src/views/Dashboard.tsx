@@ -9,8 +9,6 @@ import { useEffect, useState } from "react";
 export default function Dashboard() {
   const { articles, selectedArticleId, fetchArticles } = useArticle();
   const { checkAuth, isAuthenticated } = useUser();
-  const [accountLoginRegisterDialogOpen, setAccountLoginRegisterDialogOpen] =
-    useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Check if user is already authenticated on mount
@@ -29,13 +27,6 @@ export default function Dashboard() {
     }
   }, [isInitialized, isAuthenticated, fetchArticles]);
 
-  // Auto-open login dialog if user is not authenticated (after initial check)
-  useEffect(() => {
-    if (isInitialized && !isAuthenticated) {
-      setAccountLoginRegisterDialogOpen(true);
-    }
-  }, [isInitialized, isAuthenticated]);
-
   const selectedArticle =
     selectedArticleId !== null
       ? articles.find((a) => a.id === selectedArticleId)
@@ -43,10 +34,9 @@ export default function Dashboard() {
 
   return (
     <SidebarProvider>
-      <AccountLoginRegisterDialog
-        open={accountLoginRegisterDialogOpen}
-        onOpenChange={setAccountLoginRegisterDialogOpen}
-      />
+      {!isAuthenticated && isInitialized && (
+        <AccountLoginRegisterDialog open={true} onOpenChange={() => {}} />
+      )}
       <AppSidebar />
       <main className="h-screen w-screen p-2.5">
         {selectedArticle && <ArticleEditor article={selectedArticle} />}

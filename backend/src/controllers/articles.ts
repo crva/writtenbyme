@@ -1,5 +1,6 @@
 import { Response } from "express";
 import { z } from "zod";
+import { logger } from "../lib/logger.js";
 import { prisma } from "../lib/prisma.js";
 import { generateSlug } from "../lib/slug.js";
 import { AuthRequest } from "../types/auth.js";
@@ -60,6 +61,10 @@ export const createArticle = async (req: AuthRequest, res: Response) => {
     });
 
     if (existingArticle) {
+      logger.warn(
+        { userId: req.user.userId, title: data.title },
+        "Article creation failed: title already exists"
+      );
       return res
         .status(409)
         .json({ error: "An article with this title already exists" });
@@ -76,6 +81,16 @@ export const createArticle = async (req: AuthRequest, res: Response) => {
       },
     });
 
+    logger.info(
+      {
+        userId: req.user.userId,
+        articleId: article.id,
+        title: article.title,
+        slug: article.slug,
+      },
+      "Article created"
+    );
+
     res.status(201).json({
       article: {
         id: article.id,
@@ -88,8 +103,13 @@ export const createArticle = async (req: AuthRequest, res: Response) => {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
+      logger.warn(
+        { userId: req.user?.userId, validationError: error.issues[0].message },
+        "Article creation validation failed"
+      );
       return res.status(400).json({ error: error.issues[0].message });
     }
+    logger.error({ userId: req.user?.userId, error }, "Article creation error");
     res.status(500).json({ error: "Failed to create article" });
   }
 };
@@ -108,10 +128,18 @@ export const updateArticle = async (req: AuthRequest, res: Response) => {
     });
 
     if (!article) {
+      logger.warn(
+        { userId: req.user.userId, articleId: id },
+        "Article update failed: article not found"
+      );
       return res.status(404).json({ error: "Article not found" });
     }
 
     if (article.userId !== req.user.userId) {
+      logger.warn(
+        { userId: req.user.userId, articleId: id, ownerId: article.userId },
+        "Article update failed: unauthorized access"
+      );
       return res.status(403).json({ error: "Unauthorized" });
     }
 
@@ -126,6 +154,16 @@ export const updateArticle = async (req: AuthRequest, res: Response) => {
       },
     });
 
+    logger.info(
+      {
+        userId: req.user.userId,
+        articleId: id,
+        title: updated.title,
+        slug: updated.slug,
+      },
+      "Article updated"
+    );
+
     res.json({
       article: {
         id: updated.id,
@@ -138,8 +176,20 @@ export const updateArticle = async (req: AuthRequest, res: Response) => {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
+      logger.warn(
+        {
+          userId: req.user?.userId,
+          articleId: req.params.id,
+          validationError: error.issues[0].message,
+        },
+        "Article update validation failed"
+      );
       return res.status(400).json({ error: error.issues[0].message });
     }
+    logger.error(
+      { userId: req.user?.userId, articleId: req.params.id, error },
+      "Article update error"
+    );
     res.status(500).json({ error: "Failed to update article" });
   }
 };
@@ -157,10 +207,18 @@ export const deleteArticle = async (req: AuthRequest, res: Response) => {
     });
 
     if (!article) {
+      logger.warn(
+        { userId: req.user.userId, articleId: id },
+        "Article deletion failed: article not found"
+      );
       return res.status(404).json({ error: "Article not found" });
     }
 
     if (article.userId !== req.user.userId) {
+      logger.warn(
+        { userId: req.user.userId, articleId: id, ownerId: article.userId },
+        "Article deletion failed: unauthorized access"
+      );
       return res.status(403).json({ error: "Unauthorized" });
     }
 
@@ -168,8 +226,17 @@ export const deleteArticle = async (req: AuthRequest, res: Response) => {
       where: { id },
     });
 
+    logger.info(
+      { userId: req.user.userId, articleId: id, title: article.title },
+      "Article deleted"
+    );
+
     res.json({ message: "Article deleted" });
   } catch (error) {
+    logger.error(
+      { userId: req.user?.userId, articleId: req.params.id, error },
+      "Article deletion error"
+    );
     res.status(500).json({ error: "Failed to delete article" });
   }
 };
@@ -197,6 +264,7 @@ export const getUserArticles = async (req: AuthRequest, res: Response) => {
     });
 
     if (!user) {
+      logger.debug({ username }, "User articles fetch: user not found");
       return res.status(404).json({ error: "User not found" });
     }
 
@@ -211,6 +279,10 @@ export const getUserArticles = async (req: AuthRequest, res: Response) => {
       })),
     });
   } catch (error) {
+    logger.error(
+      { username: req.params.username, error },
+      "Failed to fetch user articles"
+    );
     res.status(500).json({ error: "Failed to fetch articles" });
   }
 };
@@ -224,6 +296,7 @@ export const getArticleBySlug = async (req: AuthRequest, res: Response) => {
     });
 
     if (!user) {
+      logger.debug({ username }, "Article fetch: user not found");
       return res.status(404).json({ error: "User not found" });
     }
 
@@ -235,6 +308,10 @@ export const getArticleBySlug = async (req: AuthRequest, res: Response) => {
     });
 
     if (!article) {
+      logger.debug(
+        { username, articleSlug },
+        "Article fetch: article not found"
+      );
       return res.status(404).json({ error: "Article not found" });
     }
 
@@ -247,6 +324,14 @@ export const getArticleBySlug = async (req: AuthRequest, res: Response) => {
       updatedAt: article.updatedAt.toISOString(),
     });
   } catch (error) {
+    logger.error(
+      {
+        username: req.params.username,
+        articleSlug: req.params.articleSlug,
+        error,
+      },
+      "Failed to fetch article by slug"
+    );
     res.status(500).json({ error: "Failed to fetch article" });
   }
 };
@@ -266,6 +351,11 @@ export const getMyArticles = async (req: AuthRequest, res: Response) => {
       },
     });
 
+    logger.debug(
+      { userId: req.user.userId, articleCount: articles.length },
+      "User articles retrieved"
+    );
+
     res.json(
       articles.map((article) => ({
         id: article.id,
@@ -277,6 +367,10 @@ export const getMyArticles = async (req: AuthRequest, res: Response) => {
       }))
     );
   } catch (error) {
+    logger.error(
+      { userId: req.user?.userId, error },
+      "Failed to fetch user articles"
+    );
     res.status(500).json({ error: "Failed to fetch articles" });
   }
 };

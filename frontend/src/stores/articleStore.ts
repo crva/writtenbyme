@@ -1,5 +1,11 @@
-import { createArticle, getMyArticles, updateArticle } from "@/lib/articleApi";
+import {
+  createArticle,
+  deleteArticle,
+  getMyArticles,
+  updateArticle,
+} from "@/lib/articleApi";
 import type { Article } from "@/types/article";
+import { toast } from "sonner";
 import { create } from "zustand";
 
 type ArticleStore = {
@@ -54,6 +60,15 @@ export const useArticle = create<ArticleStore>((set, get) => ({
 
   removeArticle: (id: string) =>
     set((state) => {
+      // Only call API if it's not a temporary article
+      if (!state.newArticles.has(id)) {
+        deleteArticle(id).catch((error) => {
+          const errorMessage =
+            error instanceof Error ? error.message : "Failed to delete article";
+          toast.error(errorMessage);
+        });
+      }
+
       const newArticles = new Set(state.newArticles);
       newArticles.delete(id);
 
@@ -100,7 +115,7 @@ export const useArticle = create<ArticleStore>((set, get) => ({
       ),
     })),
 
-  setSelectedArticle: (id: string | number | null) =>
+  setSelectedArticle: (id: string | null) =>
     set(() => ({
       selectedArticleId: id,
     })),
@@ -198,6 +213,7 @@ export const useArticle = create<ArticleStore>((set, get) => ({
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to save article";
+      toast.error(errorMessage);
       return { error: errorMessage };
     }
   },
@@ -247,8 +263,8 @@ export const useArticle = create<ArticleStore>((set, get) => ({
         articles,
         newArticles: new Set(), // Clear new articles since we just fetched from API
       });
-    } catch (error) {
-      // Silent fail for now
+    } catch {
+      toast.error("Failed to fetch articles");
     }
   },
 }));

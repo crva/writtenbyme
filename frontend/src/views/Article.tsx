@@ -32,7 +32,9 @@ export default function Article() {
         const data = await response.json();
         setArticle({ ...data, author: username });
       } catch (error) {
-        // Silent fail
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to fetch article";
+        return { error: errorMessage };
       } finally {
         setLoading(false);
       }
