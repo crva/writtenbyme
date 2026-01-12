@@ -52,6 +52,8 @@ export const useArticle = create<ArticleStore>((set, get) => ({
             id: tempId,
             title: title,
             content: "",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
           },
         ],
         newArticles,
@@ -251,11 +253,15 @@ export const useArticle = create<ArticleStore>((set, get) => ({
           title: string;
           slug?: string;
           content: string;
+          createdAt?: string;
+          updatedAt?: string;
         }) => ({
           id: article.id,
           title: article.title,
           slug: article.slug,
           content: article.content,
+          createdAt: article.createdAt || new Date().toISOString(),
+          updatedAt: article.updatedAt || new Date().toISOString(),
         })
       );
 
