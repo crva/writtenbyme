@@ -1,10 +1,11 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router";
-import "./index.css";
 import App from "./App.tsx";
-import Dashboard from "./views/Dashboard.tsx";
 import { ThemeProvider } from "./components/ThemeProvider.tsx";
+import "./index.css";
+import Article from "./views/Article.tsx";
+import Dashboard from "./views/Dashboard.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -13,6 +14,7 @@ createRoot(document.getElementById("root")!).render(
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/:username/:articleTitle" element={<Article />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
