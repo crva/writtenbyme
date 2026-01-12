@@ -1,0 +1,23 @@
+meta {
+  name: login
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:3001/api/auth/signin
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "valentin@gmail.com",
+    "password": "testtest"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

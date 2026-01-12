@@ -1,0 +1,14 @@
+meta {
+  name: get public article
+  type: http
+  seq: 7
+}
+
+get {
+  url: http://localhost:3001/api/articles/test/my-first-article
+  auth: inherit
+}
+
+vars:post-response {
+  articleId: res.body.id
+}

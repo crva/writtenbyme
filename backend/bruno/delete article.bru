@@ -1,0 +1,10 @@
+meta {
+  name: delete article
+  type: http
+  seq: 10
+}
+
+delete {
+  url: http://localhost:3001/api/articles/{{articleId}}
+  auth: inherit
+}

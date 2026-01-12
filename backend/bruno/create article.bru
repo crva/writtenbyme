@@ -1,0 +1,18 @@
+meta {
+  name: create article
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:3001/api/articles
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "title": "My First Article",
+    "content": "# Hello\n\nThis is my article content in markdown."
+  }
+}
