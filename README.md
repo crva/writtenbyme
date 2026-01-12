@@ -6,25 +6,6 @@ Simple web app to create, edit, and share articles with a modern UI and reliable
 
 ---
 
-## ✨ Features
-
-✅ **User Authentication**
-
-- Register new accounts
-- Login with email/password
-- Session persistence (survives page refresh)
-- Secure HTTP-only cookies
-- Auto-logout with session expiry
-
-✅ **Article Management**
-
-- Create, edit, and delete articles
-- View your article collection
-- Share articles publicly (view-only)
-- Ownership-based access control
-
----
-
 ## 🚀 Quick Start
 
 ### Prerequisites
