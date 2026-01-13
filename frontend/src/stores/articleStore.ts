@@ -28,6 +28,7 @@ type ArticleStore = {
   fetchArticles: () => Promise<void>;
   fetchUserArticles: (username: string) => Promise<void>;
   fetchArticleBySlug: (username: string, slug: string) => Promise<void>;
+  clearCurrentArticle: () => void;
 };
 
 /**
@@ -316,4 +317,6 @@ export const useArticle = create<ArticleStore>((set, get) => ({
       set({ currentArticle: null, loading: false });
     }
   },
+
+  clearCurrentArticle: () => set({ currentArticle: null }),
 }));
