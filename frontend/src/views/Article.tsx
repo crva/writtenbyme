@@ -1,9 +1,7 @@
 import { PageLayout } from "@/components/PageContent";
 import { Button } from "@/components/ui/button";
 import { useArticle } from "@/stores/articleStore";
-import "@uiw/react-markdown-preview/markdown.css";
 import MDEditor from "@uiw/react-md-editor";
-import "@uiw/react-md-editor/markdown-editor.css";
 import { ArrowLeft } from "lucide-react";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
@@ -70,15 +68,17 @@ export default function Article() {
           </div>
 
           {/* Markdown Content */}
-          <article className="react-markdown" data-color-mode="dark">
-            <MDEditor.Markdown
-              source={currentArticle.content}
-              style={{
-                backgroundColor: "transparent",
-                color: "inherit",
-                padding: 0,
-              }}
-            />
+          <article className="react-markdown">
+            <div data-color-mode="dark">
+              <MDEditor.Markdown
+                source={currentArticle.content}
+                style={{
+                  backgroundColor: "transparent",
+                  color: "inherit",
+                  padding: 0,
+                }}
+              />
+            </div>
           </article>
         </>
       )}
