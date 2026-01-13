@@ -1,5 +1,4 @@
 import { PageLayout } from "@/components/PageContent";
-import { Button } from "@/components/ui/button";
 import { useArticle } from "@/stores/articleStore";
 import MDEditor from "@uiw/react-md-editor";
 import { ArrowLeft } from "lucide-react";
@@ -39,18 +38,7 @@ export default function Article() {
       }
       onHeaderClick={() => navigate(`/${username}`)}
     >
-      {!currentArticle ? (
-        <div className="flex flex-col items-center justify-center flex-1">
-          <div className="text-center">
-            <p className="text-lg text-muted-foreground mb-4">
-              Article not found
-            </p>
-            <Button asChild>
-              <a href="/">Go back home</a>
-            </Button>
-          </div>
-        </div>
-      ) : (
+      {currentArticle && (
         <>
           {/* Author and Title */}
           <div className="mb-8">

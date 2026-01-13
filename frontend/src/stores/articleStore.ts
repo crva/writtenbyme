@@ -282,11 +282,10 @@ export const useArticle = create<ArticleStore>((set, get) => ({
         })),
         loading: false,
       });
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch articles";
-      toast.error(errorMessage);
+    } catch (_error) {
       set({ articles: [], loading: false });
+      // Redirect to homepage on error (unknown username)
+      window.location.href = "/";
     }
   },
 
@@ -307,11 +306,10 @@ export const useArticle = create<ArticleStore>((set, get) => ({
         },
         loading: false,
       });
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch article";
-      toast.error(errorMessage);
+    } catch (_error) {
       set({ currentArticle: null, loading: false });
+      // Redirect to homepage on error (unknown article)
+      window.location.href = "/";
     }
   },
 
