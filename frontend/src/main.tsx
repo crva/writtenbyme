@@ -7,6 +7,7 @@ import { ThemeProvider } from "./components/ThemeProvider.tsx";
 import "./index.css";
 import Article from "./views/Article.tsx";
 import Dashboard from "./views/Dashboard.tsx";
+import UserArticles from "./views/UserArticles.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -15,6 +16,7 @@ createRoot(document.getElementById("root")!).render(
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/:username" element={<UserArticles />} />
           <Route path="/:username/:articleSlug" element={<Article />} />
         </Routes>
       </BrowserRouter>

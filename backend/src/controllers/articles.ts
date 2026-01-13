@@ -252,9 +252,8 @@ export const getUserArticles = async (req: AuthRequest, res: Response) => {
           select: {
             id: true,
             title: true,
-            content: true,
-            createdAt: true,
             updatedAt: true,
+            slug: true,
           },
           orderBy: {
             createdAt: "desc",
@@ -273,9 +272,8 @@ export const getUserArticles = async (req: AuthRequest, res: Response) => {
       articles: user.articles.map((article) => ({
         id: article.id,
         title: article.title,
-        content: article.content,
-        createdAt: article.createdAt.toISOString(),
         updatedAt: article.updatedAt.toISOString(),
+        slug: article.slug,
       })),
     });
   } catch (error) {

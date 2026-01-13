@@ -1,11 +1,12 @@
+import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import type { Article } from "@/types/article";
+import { useArticle } from "@/stores/articleStore";
 import "@uiw/react-markdown-preview/markdown.css";
 import MDEditor from "@uiw/react-md-editor";
 import "@uiw/react-md-editor/markdown-editor.css";
 import { ArrowLeft } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useEffect } from "react";
+import { useNavigate, useParams } from "react-router";
 
 export default function Article() {
   const { username, articleSlug } = useParams<{
@@ -13,35 +14,14 @@ export default function Article() {
     articleSlug: string;
   }>();
   const navigate = useNavigate();
-  const [article, setArticle] = useState<(Article & { author: string }) | null>(
-    null
-  );
-  const [loading, setLoading] = useState(true);
+  const currentArticle = useArticle((state) => state.currentArticle);
+  const loading = useArticle((state) => state.loading);
+  const fetchArticleBySlug = useArticle((state) => state.fetchArticleBySlug);
 
   useEffect(() => {
-    const fetchArticle = async () => {
-      if (!username || !articleSlug) return;
-
-      try {
-        const response = await fetch(
-          `http://localhost:3001/api/articles/${username}/${articleSlug}`
-        );
-        if (!response.ok) {
-          throw new Error("Article not found");
-        }
-        const data = await response.json();
-        setArticle({ ...data, author: username });
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : "Failed to fetch article";
-        return { error: errorMessage };
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArticle();
-  }, [username, articleSlug]);
+    if (!username || !articleSlug) return;
+    fetchArticleBySlug(username, articleSlug);
+  }, [username, articleSlug, fetchArticleBySlug]);
 
   if (loading) {
     return (
@@ -53,7 +33,7 @@ export default function Article() {
     );
   }
 
-  if (!article) {
+  if (!currentArticle) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
         <div className="text-center">
@@ -77,20 +57,20 @@ export default function Article() {
           variant="ghost"
           size="sm"
           className="mb-8 -ml-2"
-          onClick={() => navigate(`/${article.author}`)}
+          onClick={() => navigate(`/${currentArticle.author}`)}
         >
           <ArrowLeft className="h-4 w-4" />
-          <p>{article.author}</p>
+          <p>{currentArticle.author}</p>
         </Button>
 
         {/* Author and Title */}
         <div className="mb-8">
           <h1 className="text-4xl md:text-5xl font-bold mb-2">
-            {article.title}
+            {currentArticle.title}
           </h1>
           <span className="text-sm text-muted">
             Last update:{" "}
-            {new Date(article.updatedAt).toLocaleDateString("en-US", {
+            {new Date(currentArticle.updatedAt).toLocaleDateString("en-US", {
               day: "numeric",
               month: "long",
               year: "numeric",
@@ -101,7 +81,7 @@ export default function Article() {
         {/* Markdown Content */}
         <article className="react-markdown" data-color-mode="dark">
           <MDEditor.Markdown
-            source={article.content}
+            source={currentArticle.content}
             style={{
               backgroundColor: "transparent",
               color: "inherit",
@@ -112,17 +92,7 @@ export default function Article() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t bg-muted/30">
-        <div className="py-4">
-          <div className="flex justify-center items-center">
-            <Button variant="ghost" className="text-lg font-semibold" asChild>
-              <Link to="/">
-                <span className="text-base font-semibold">writtenbyme</span>
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

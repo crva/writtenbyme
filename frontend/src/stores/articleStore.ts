@@ -1,7 +1,9 @@
 import {
   createArticle,
   deleteArticle,
+  getArticleBySlug,
   getMyArticles,
+  getUserArticles,
   updateArticle,
 } from "@/lib/articleApi";
 import type { Article } from "@/types/article";
@@ -14,6 +16,8 @@ type ArticleStore = {
   unsavedChanges: Record<string, string>;
   originalContent: Record<string, string>;
   newArticles: Set<string>; // Track temporary IDs of articles not yet saved to API
+  currentArticle: (Article & { author: string }) | null;
+  loading: boolean;
   addArticle: (title: string) => void;
   removeArticle: (id: string) => void;
   updateArticleContent: (id: string, content: string) => void;
@@ -22,6 +26,8 @@ type ArticleStore = {
   saveChanges: (id: string) => Promise<{ error?: string; success?: boolean }>;
   discardChanges: (id: string) => void;
   fetchArticles: () => Promise<void>;
+  fetchUserArticles: (username: string) => Promise<void>;
+  fetchArticleBySlug: (username: string, slug: string) => Promise<void>;
 };
 
 /**
@@ -38,6 +44,8 @@ export const useArticle = create<ArticleStore>((set, get) => ({
   unsavedChanges: {},
   originalContent: {},
   newArticles: new Set(),
+  currentArticle: null,
+  loading: false,
 
   addArticle: (title: string) =>
     set((state) => {
@@ -244,26 +252,9 @@ export const useArticle = create<ArticleStore>((set, get) => ({
       const response = await getMyArticles();
 
       // Handle both array response and wrapped response
-      const data = Array.isArray(response) ? response : response.articles || [];
-
-      // Convert API response to Article type (keep ids as strings from API)
-      const articles: Article[] = data.map(
-        (article: {
-          id: string;
-          title: string;
-          slug?: string;
-          content: string;
-          createdAt?: string;
-          updatedAt?: string;
-        }) => ({
-          id: article.id,
-          title: article.title,
-          slug: article.slug,
-          content: article.content,
-          createdAt: article.createdAt || new Date().toISOString(),
-          updatedAt: article.updatedAt || new Date().toISOString(),
-        })
-      );
+      const articles = Array.isArray(response)
+        ? response
+        : response.articles || [];
 
       set({
         articles,
@@ -271,6 +262,41 @@ export const useArticle = create<ArticleStore>((set, get) => ({
       });
     } catch {
       toast.error("Failed to fetch articles");
+    }
+  },
+
+  fetchUserArticles: async (username: string) => {
+    try {
+      set({ loading: true });
+      const response = await getUserArticles(username);
+
+      const articles = Array.isArray(response)
+        ? response
+        : response.articles || [];
+
+      set({ articles, loading: false });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to fetch articles";
+      toast.error(errorMessage);
+      set({ articles: [], loading: false });
+    }
+  },
+
+  fetchArticleBySlug: async (username: string, slug: string) => {
+    try {
+      set({ loading: true });
+      const response = await getArticleBySlug(username, slug);
+
+      set({
+        currentArticle: { ...response.article, author: username },
+        loading: false,
+      });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to fetch article";
+      toast.error(errorMessage);
+      set({ currentArticle: null, loading: false });
     }
   },
 }));
