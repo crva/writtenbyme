@@ -1,6 +1,6 @@
 import { NextFunction, Response } from "express";
-import { logger } from "../lib/logger.js";
-import { AuthRequest } from "../types/auth.js";
+import { logger } from "../lib/logger";
+import { AuthRequest } from "../types/auth";
 
 export const requireAuth = (
   req: AuthRequest,

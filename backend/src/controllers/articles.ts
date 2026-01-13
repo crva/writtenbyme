@@ -1,9 +1,9 @@
 import { Response } from "express";
 import { z } from "zod";
-import { logger } from "../lib/logger.js";
-import { prisma } from "../lib/prisma.js";
-import { generateSlug } from "../lib/slug.js";
-import { AuthRequest } from "../types/auth.js";
+import { logger } from "../lib/logger";
+import { prisma } from "../lib/prisma";
+import { generateSlug } from "../lib/slug";
+import { AuthRequest } from "../types/auth";
 
 const articleSchema = z.object({
   title: z.string().min(1).max(255),

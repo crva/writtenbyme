@@ -1,12 +1,12 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
-import { config } from "./config.js";
-import passport from "./config/passport.js";
-import { sessionMiddleware } from "./config/session.js";
-import { logger } from "./lib/logger.js";
-import articlesRoutes from "./routes/articles.js";
-import authRoutes from "./routes/auth.js";
+import { config } from "./config";
+import passport from "./config/passport";
+import { sessionMiddleware } from "./config/session";
+import { logger } from "./lib/logger";
+import articlesRoutes from "./routes/articles";
+import authRoutes from "./routes/auth";
 
 const app = express();
 

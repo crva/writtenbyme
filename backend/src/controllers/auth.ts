@@ -1,9 +1,9 @@
 import bcrypt from "bcryptjs";
 import { Response } from "express";
 import { z } from "zod";
-import { logger } from "../lib/logger.js";
-import { prisma } from "../lib/prisma.js";
-import { AuthPayload, AuthRequest } from "../types/auth.js";
+import { logger } from "../lib/logger";
+import { prisma } from "../lib/prisma";
+import { AuthPayload, AuthRequest } from "../types/auth";
 
 const registerSchema = z.object({
   username: z.string().min(3).max(30),

@@ -1,7 +1,7 @@
 import pgSession from "connect-pg-simple";
 import session from "express-session";
 import { Pool } from "pg";
-import { config } from "../config.js";
+import { config } from "./config";
 
 const pgPool = new Pool({
   connectionString: process.env.DATABASE_URL,

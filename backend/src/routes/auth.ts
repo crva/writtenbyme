@@ -1,7 +1,7 @@
 import { Router } from "express";
 import passport from "passport";
-import { getSession, login, logout, register } from "../controllers/auth.js";
-import { requireAuth } from "../middleware/auth.js";
+import { getSession, login, logout, register } from "../controllers/auth";
+import { requireAuth } from "../middleware/auth";
 
 const router = Router();
 
