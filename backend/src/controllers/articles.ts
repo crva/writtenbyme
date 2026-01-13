@@ -351,6 +351,7 @@ export const getMyArticles = async (req: AuthRequest, res: Response) => {
         id: true,
         title: true,
         slug: true,
+        content: true,
         updatedAt: true,
         createdAt: true,
       },
@@ -371,6 +372,7 @@ export const getMyArticles = async (req: AuthRequest, res: Response) => {
         slug: article.slug,
         updatedAt: article.updatedAt.toISOString(),
         createdAt: article.createdAt.toISOString(),
+        content: article.content,
       })),
     });
   } catch (error) {

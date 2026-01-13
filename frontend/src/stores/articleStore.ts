@@ -258,10 +258,7 @@ export const useArticle = create<ArticleStore>((set, get) => ({
         : response.articles || [];
 
       set({
-        articles: articles.map((article) => ({
-          ...article,
-          content: "",
-        })),
+        articles: articles,
         newArticles: new Set(), // Clear new articles since we just fetched from API
       });
     } catch {

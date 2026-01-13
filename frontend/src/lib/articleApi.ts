@@ -47,10 +47,10 @@ export const createArticle = (payload: CreateArticlePayload) =>
   );
 
 /**
- * Get current user's articles (list view - no content)
+ * Get current user's articles (with content)
  */
 export const getMyArticles = () =>
-  apiGet<{ articles: ArticleListResponse[] }>("/articles/me");
+  apiGet<{ articles: ArticleResponse[] }>("/articles/me");
 
 /**
  * Get all articles by username (list view - no content)
