@@ -1,5 +1,6 @@
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { useArticle } from "@/stores/articleStore";
 import "@uiw/react-markdown-preview/markdown.css";
@@ -27,13 +28,13 @@ export default function Article() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Main Content */}
-      <div className="flex-1 max-w-4xl mx-auto w-full px-4 py-12 md:py-16">
+      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4 py-12 md:py-16">
         {loading ? (
-          <div className="flex items-center justify-center h-screen">
+          <div className="flex flex-1 items-center justify-center">
             <Spinner />
           </div>
         ) : !currentArticle ? (
-          <div className="flex flex-col items-center justify-center h-screen">
+          <div className="flex flex-col items-center justify-center flex-1">
             <div className="text-center">
               <p className="text-lg text-muted-foreground mb-4">
                 Article not found
@@ -45,16 +46,23 @@ export default function Article() {
           </div>
         ) : (
           <>
-            {/* Back Button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="mb-8 -ml-2"
+            {/* Username */}
+            <div
+              className="mb-8 cursor-pointer"
               onClick={() => navigate(`/${currentArticle.author}`)}
             >
-              <ArrowLeft className="h-4 w-4" />
-              <p>{currentArticle.author}</p>
-            </Button>
+              <h4 className="text-2xl md:text-2xl font-bold mb-4 text-center">
+                <div className="flex justify-between items-baseline">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  <div>
+                    <span>written by </span>
+                    <span className="text-primary">{username}</span>
+                  </div>
+                  <span></span>
+                </div>
+              </h4>
+              <Separator />
+            </div>
 
             {/* Author and Title */}
             <div className="mb-8">

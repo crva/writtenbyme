@@ -33,27 +33,27 @@ export default function UserArticles() {
       {/* Main Content */}
       <div className="flex-1 max-w-4xl mx-auto w-full px-4 py-12 md:py-16">
         {/* Username */}
-        <div className="mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-center">
+        <div className="mb-4">
+          <h4 className="text-2xl md:text-2xl font-bold mb-4 text-center">
             <span>articles written by </span>
             <span className="text-primary">{username}</span>
-          </h1>
+          </h4>
           <Separator />
         </div>
 
         {/* Articles List */}
-        <div className="space-y-4">
+        <div>
           {articles.length === 0 ? (
             <p className="text-muted-foreground">No articles yet</p>
           ) : (
             articles.map((article) => (
-              <button
+              <div
                 key={article.id}
                 onClick={() => navigate(`/${username}/${article.slug}`)}
-                className="w-full text-left hover:opacity-70 transition-opacity py-3"
+                className="w-full text-left opacity-70 hover:opacity-100 transition-opacity"
               >
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-medium">{article.title}</span>
+                  <span className="text-lg">{article.title}</span>
                   <span className="text-sm text-muted-foreground">
                     {new Date(article.updatedAt).toLocaleDateString("en-US", {
                       day: "numeric",
@@ -62,7 +62,7 @@ export default function UserArticles() {
                     })}
                   </span>
                 </div>
-              </button>
+              </div>
             ))
           )}
         </div>
