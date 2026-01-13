@@ -13,13 +13,16 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
 import { CreditCard, EllipsisVertical, LogOut, UserCircle } from "lucide-react";
 
 export default function SidebarUser() {
   const { user, logout, isAuthenticated } = useUser();
+  const resetStore = useArticle((state) => state.resetStore);
 
   const handleLogout = async () => {
+    resetStore();
     await logout();
   };
 

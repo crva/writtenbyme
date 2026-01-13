@@ -29,6 +29,7 @@ type ArticleStore = {
   fetchUserArticles: (username: string) => Promise<void>;
   fetchArticleBySlug: (username: string, slug: string) => Promise<void>;
   clearCurrentArticle: () => void;
+  resetStore: () => void;
 };
 
 /**
@@ -282,7 +283,7 @@ export const useArticle = create<ArticleStore>((set, get) => ({
         })),
         loading: false,
       });
-    } catch (_error) {
+    } catch {
       set({ articles: [], loading: false });
       // Redirect to homepage on error (unknown username)
       window.location.href = "/";
@@ -306,7 +307,7 @@ export const useArticle = create<ArticleStore>((set, get) => ({
         },
         loading: false,
       });
-    } catch (_error) {
+    } catch {
       set({ currentArticle: null, loading: false });
       // Redirect to homepage on error (unknown article)
       window.location.href = "/";
@@ -314,4 +315,15 @@ export const useArticle = create<ArticleStore>((set, get) => ({
   },
 
   clearCurrentArticle: () => set({ currentArticle: null }),
+
+  resetStore: () =>
+    set({
+      articles: [],
+      selectedArticleId: null,
+      unsavedChanges: {},
+      originalContent: {},
+      newArticles: new Set(),
+      currentArticle: null,
+      loading: false,
+    }),
 }));
