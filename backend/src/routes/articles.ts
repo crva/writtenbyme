@@ -1,13 +1,13 @@
 import { Router } from "express";
 import * as articlesController from "../controllers/articles.js";
-import { verifyToken } from "../middleware/auth.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const router = Router();
 
-router.post("/", verifyToken, articlesController.createArticle);
-router.get("/me", verifyToken, articlesController.getMyArticles);
-router.put("/:id", verifyToken, articlesController.updateArticle);
-router.delete("/:id", verifyToken, articlesController.deleteArticle);
+router.post("/", requireAuth, articlesController.createArticle);
+router.get("/me", requireAuth, articlesController.getMyArticles);
+router.put("/:id", requireAuth, articlesController.updateArticle);
+router.delete("/:id", requireAuth, articlesController.deleteArticle);
 
 // More specific routes must come before less specific ones
 router.get("/:username/:articleSlug", articlesController.getArticleBySlug);

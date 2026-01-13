@@ -55,14 +55,14 @@ export const createArticle = async (req: AuthRequest, res: Response) => {
     // Check if title already exists for this user
     const existingArticle = await prisma.article.findFirst({
       where: {
-        userId: req.user.userId,
+        userId: req.user.id,
         title: data.title,
       },
     });
 
     if (existingArticle) {
       logger.warn(
-        { userId: req.user.userId, title: data.title },
+        { userId: req.user.id, title: data.title },
         "Article creation failed: title already exists"
       );
       return res
@@ -70,11 +70,11 @@ export const createArticle = async (req: AuthRequest, res: Response) => {
         .json({ error: "An article with this title already exists" });
     }
 
-    const slug = await generateUniqueSlug(req.user.userId, data.title);
+    const slug = await generateUniqueSlug(req.user.id, data.title);
 
     const article = await prisma.article.create({
       data: {
-        userId: req.user.userId,
+        userId: req.user.id,
         title: data.title,
         slug: slug,
         content: data.content,
@@ -83,7 +83,7 @@ export const createArticle = async (req: AuthRequest, res: Response) => {
 
     logger.info(
       {
-        userId: req.user.userId,
+        userId: req.user.id,
         articleId: article.id,
         title: article.title,
         slug: article.slug,
@@ -104,12 +104,12 @@ export const createArticle = async (req: AuthRequest, res: Response) => {
   } catch (error) {
     if (error instanceof z.ZodError) {
       logger.warn(
-        { userId: req.user?.userId, validationError: error.issues[0].message },
+        { userId: req.user?.id, validationError: error.issues[0].message },
         "Article creation validation failed"
       );
       return res.status(400).json({ error: error.issues[0].message });
     }
-    logger.error({ userId: req.user?.userId, error }, "Article creation error");
+    logger.error({ userId: req.user?.id, error }, "Article creation error");
     res.status(500).json({ error: "Failed to create article" });
   }
 };
@@ -129,21 +129,21 @@ export const updateArticle = async (req: AuthRequest, res: Response) => {
 
     if (!article) {
       logger.warn(
-        { userId: req.user.userId, articleId: id },
+        { userId: req.user.id, articleId: id },
         "Article update failed: article not found"
       );
       return res.status(404).json({ error: "Article not found" });
     }
 
-    if (article.userId !== req.user.userId) {
+    if (article.userId !== req.user.id) {
       logger.warn(
-        { userId: req.user.userId, articleId: id, ownerId: article.userId },
+        { userId: req.user.id, articleId: id, ownerId: article.userId },
         "Article update failed: unauthorized access"
       );
       return res.status(403).json({ error: "Unauthorized" });
     }
 
-    const slug = await generateUniqueSlug(req.user.userId, data.title, id);
+    const slug = await generateUniqueSlug(req.user.id, data.title, id);
 
     const updated = await prisma.article.update({
       where: { id },
@@ -156,7 +156,7 @@ export const updateArticle = async (req: AuthRequest, res: Response) => {
 
     logger.info(
       {
-        userId: req.user.userId,
+        userId: req.user.id,
         articleId: id,
         title: updated.title,
         slug: updated.slug,
@@ -178,7 +178,7 @@ export const updateArticle = async (req: AuthRequest, res: Response) => {
     if (error instanceof z.ZodError) {
       logger.warn(
         {
-          userId: req.user?.userId,
+          userId: req.user?.id,
           articleId: req.params.id,
           validationError: error.issues[0].message,
         },
@@ -187,7 +187,7 @@ export const updateArticle = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: error.issues[0].message });
     }
     logger.error(
-      { userId: req.user?.userId, articleId: req.params.id, error },
+      { userId: req.user?.id, articleId: req.params.id, error },
       "Article update error"
     );
     res.status(500).json({ error: "Failed to update article" });
@@ -208,15 +208,15 @@ export const deleteArticle = async (req: AuthRequest, res: Response) => {
 
     if (!article) {
       logger.warn(
-        { userId: req.user.userId, articleId: id },
+        { userId: req.user.id, articleId: id },
         "Article deletion failed: article not found"
       );
       return res.status(404).json({ error: "Article not found" });
     }
 
-    if (article.userId !== req.user.userId) {
+    if (article.userId !== req.user.id) {
       logger.warn(
-        { userId: req.user.userId, articleId: id, ownerId: article.userId },
+        { userId: req.user.id, articleId: id, ownerId: article.userId },
         "Article deletion failed: unauthorized access"
       );
       return res.status(403).json({ error: "Unauthorized" });
@@ -227,14 +227,14 @@ export const deleteArticle = async (req: AuthRequest, res: Response) => {
     });
 
     logger.info(
-      { userId: req.user.userId, articleId: id, title: article.title },
+      { userId: req.user.id, articleId: id, title: article.title },
       "Article deleted"
     );
 
     res.json({ message: "Article deleted" });
   } catch (error) {
     logger.error(
-      { userId: req.user?.userId, articleId: req.params.id, error },
+      { userId: req.user?.id, articleId: req.params.id, error },
       "Article deletion error"
     );
     res.status(500).json({ error: "Failed to delete article" });
@@ -344,7 +344,7 @@ export const getMyArticles = async (req: AuthRequest, res: Response) => {
 
     const articles = await prisma.article.findMany({
       where: {
-        userId: req.user.userId,
+        userId: req.user.id,
       },
       orderBy: {
         createdAt: "desc",
@@ -352,7 +352,7 @@ export const getMyArticles = async (req: AuthRequest, res: Response) => {
     });
 
     logger.debug(
-      { userId: req.user.userId, articleCount: articles.length },
+      { userId: req.user.id, articleCount: articles.length },
       "User articles retrieved"
     );
 
@@ -368,7 +368,7 @@ export const getMyArticles = async (req: AuthRequest, res: Response) => {
     );
   } catch (error) {
     logger.error(
-      { userId: req.user?.userId, error },
+      { userId: req.user?.id, error },
       "Failed to fetch user articles"
     );
     res.status(500).json({ error: "Failed to fetch articles" });

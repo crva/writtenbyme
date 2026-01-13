@@ -1,9 +1,12 @@
+import type { User } from "@prisma/client";
 import { Request } from "express";
 
-export interface AuthPayload {
-  userId: string;
-  username: string;
-  email: string;
+export type AuthPayload = Omit<User, "password">;
+
+declare global {
+  namespace Express {
+    interface User extends AuthPayload {}
+  }
 }
 
 export interface AuthRequest extends Request {
@@ -13,12 +16,12 @@ export interface AuthRequest extends Request {
 }
 
 export interface AuthResponse {
-  token: string;
   user: {
     id: string;
     username: string;
     email: string;
   };
+  message: string;
 }
 
 export interface ArticleResponse {

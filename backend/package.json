@@ -13,16 +13,19 @@
     "prisma:studio": "npx prisma studio"
   },
   "dependencies": {
-    "@auth/express": "^0.12.1",
-    "@auth/prisma-adapter": "^2.2.0",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/internals": "^7.2.0",
+    "@types/passport": "^1.0.17",
     "bcryptjs": "^3.0.3",
+    "connect-pg-simple": "^10.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "express-session": "^1.18.2",
     "jsonwebtoken": "^9.0.3",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
     "pg": "^8.16.3",
     "pino": "^10.1.1",
     "pino-http": "^11.0.0",
@@ -33,12 +36,16 @@
   "devDependencies": {
     "@prisma/client": "^7.2.0",
     "@types/bcryptjs": "^2.4.6",
+    "@types/connect-pg-simple": "^7.0.3",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.6",
+    "@types/express-session": "^1.18.2",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.0.6",
+    "@types/passport-local": "^1.0.38",
+    "@types/pg": "^8.16.0",
     "tsx": "^4.21.0"
   }
 }
