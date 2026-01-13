@@ -5,4 +5,5 @@ export type Article = {
   content: string;
   createdAt: string;
   updatedAt: string;
+  author?: string;
 };

@@ -16,7 +16,7 @@ type ArticleStore = {
   unsavedChanges: Record<string, string>;
   originalContent: Record<string, string>;
   newArticles: Set<string>; // Track temporary IDs of articles not yet saved to API
-  currentArticle: (Article & { author: string }) | null;
+  currentArticle: Article | null;
   loading: boolean;
   addArticle: (title: string) => void;
   removeArticle: (id: string) => void;
@@ -257,7 +257,10 @@ export const useArticle = create<ArticleStore>((set, get) => ({
         : response.articles || [];
 
       set({
-        articles,
+        articles: articles.map((article) => ({
+          ...article,
+          content: "",
+        })),
         newArticles: new Set(), // Clear new articles since we just fetched from API
       });
     } catch {
@@ -274,7 +277,13 @@ export const useArticle = create<ArticleStore>((set, get) => ({
         ? response
         : response.articles || [];
 
-      set({ articles, loading: false });
+      set({
+        articles: articles.map((article) => ({
+          ...article,
+          content: "",
+        })),
+        loading: false,
+      });
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to fetch articles";
@@ -289,7 +298,15 @@ export const useArticle = create<ArticleStore>((set, get) => ({
       const response = await getArticleBySlug(username, slug);
 
       set({
-        currentArticle: { ...response.article, author: username },
+        currentArticle: {
+          id: response.article.id,
+          title: response.article.title,
+          slug: response.article.slug,
+          content: response.article.content,
+          createdAt: response.article.createdAt,
+          updatedAt: response.article.updatedAt,
+          author: response.article.author,
+        },
         loading: false,
       });
     } catch (error) {

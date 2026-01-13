@@ -314,12 +314,15 @@ export const getArticleBySlug = async (req: AuthRequest, res: Response) => {
     }
 
     res.json({
-      id: article.id,
-      title: article.title,
-      slug: article.slug,
-      content: article.content,
-      createdAt: article.createdAt.toISOString(),
-      updatedAt: article.updatedAt.toISOString(),
+      article: {
+        id: article.id,
+        title: article.title,
+        slug: article.slug,
+        content: article.content,
+        author: user.username,
+        createdAt: article.createdAt.toISOString(),
+        updatedAt: article.updatedAt.toISOString(),
+      },
     });
   } catch (error) {
     logger.error(
@@ -344,6 +347,13 @@ export const getMyArticles = async (req: AuthRequest, res: Response) => {
       where: {
         userId: req.user.id,
       },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        updatedAt: true,
+        createdAt: true,
+      },
       orderBy: {
         createdAt: "desc",
       },
@@ -354,16 +364,15 @@ export const getMyArticles = async (req: AuthRequest, res: Response) => {
       "User articles retrieved"
     );
 
-    res.json(
-      articles.map((article) => ({
+    res.json({
+      articles: articles.map((article) => ({
         id: article.id,
         title: article.title,
         slug: article.slug,
-        content: article.content,
-        createdAt: article.createdAt.toISOString(),
         updatedAt: article.updatedAt.toISOString(),
-      }))
-    );
+        createdAt: article.createdAt.toISOString(),
+      })),
+    });
   } catch (error) {
     logger.error(
       { userId: req.user?.id, error },

@@ -6,6 +6,19 @@
 import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/api";
 import type { Article } from "@/types/article";
 
+export interface ArticleListResponse {
+  id: string;
+  slug: string;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+}
+
+export interface ArticleDetailResponse extends ArticleListResponse {
+  content: string;
+  author: string;
+}
+
 export interface ArticleResponse extends Omit<Article, "id"> {
   id: string;
   slug: string;
@@ -34,22 +47,22 @@ export const createArticle = (payload: CreateArticlePayload) =>
   );
 
 /**
- * Get current user's articles
+ * Get current user's articles (list view - no content)
  */
 export const getMyArticles = () =>
-  apiGet<{ articles: ArticleResponse[] }>("/articles/me");
+  apiGet<{ articles: ArticleListResponse[] }>("/articles/me");
 
 /**
- * Get all articles by username
+ * Get all articles by username (list view - no content)
  */
 export const getUserArticles = (username: string) =>
-  apiGet<{ articles: ArticleResponse[] }>(`/articles/${username}`);
+  apiGet<{ articles: ArticleListResponse[] }>(`/articles/${username}`);
 
 /**
- * Get a specific article by username and slug
+ * Get a specific article by username and slug (detail view - with content)
  */
 export const getArticleBySlug = (username: string, slug: string) =>
-  apiGet<{ article: ArticleResponse }>(`/articles/${username}/${slug}`);
+  apiGet<{ article: ArticleDetailResponse }>(`/articles/${username}/${slug}`);
 
 /**
  * Update an article
