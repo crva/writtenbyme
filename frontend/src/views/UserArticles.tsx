@@ -1,5 +1,6 @@
 import { Footer } from "@/components/Footer";
 import { Separator } from "@/components/ui/separator";
+import { Spinner } from "@/components/ui/spinner";
 import { useArticle } from "@/stores/articleStore";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
@@ -19,10 +20,8 @@ export default function UserArticles() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <div className="flex-1 max-w-4xl mx-auto w-full px-4 py-12 md:py-16">
-          <div className="flex items-center justify-center h-40">
-            <p className="text-lg text-muted-foreground">Loading articles...</p>
-          </div>
+        <div className="flex-1 flex items-center justify-center">
+          <Spinner />
         </div>
         <Footer />
       </div>
@@ -35,7 +34,10 @@ export default function UserArticles() {
       <div className="flex-1 max-w-4xl mx-auto w-full px-4 py-12 md:py-16">
         {/* Username */}
         <div className="mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">{username}</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-center">
+            <span>articles written by </span>
+            <span className="text-primary">{username}</span>
+          </h1>
           <Separator />
         </div>
 
