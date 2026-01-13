@@ -31,7 +31,7 @@ export default function ArticleTitle({ title }: Props) {
               {title}
             </span>
           </TooltipTrigger>
-          <TooltipContent side="right">{title}</TooltipContent>
+          <TooltipContent side="top">{title}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     );

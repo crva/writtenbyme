@@ -7,6 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import {
   Tooltip,
   TooltipContent,
@@ -78,9 +79,9 @@ export default function ArticleSettings({ articleId }: Props) {
       )}
       <DropdownMenu>
         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-          <button className="p-1 hover:bg-sidebar-accent rounded">
+          <div className="p-1 rounded">
             <Ellipsis className="size-4" />
-          </button>
+          </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" side="right">
           {hasUnsavedChanges && (
@@ -89,6 +90,10 @@ export default function ArticleSettings({ articleId }: Props) {
                 <DropdownMenuItem onClick={handleSave}>
                   <Check className="size-4 text-green-500" />
                   Save changes
+                  <KbdGroup>
+                    <Kbd>⌘</Kbd>
+                    <Kbd>S</Kbd>
+                  </KbdGroup>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleDiscard}>
                   <X className="size-4 text-destructive" />

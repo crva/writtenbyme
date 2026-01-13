@@ -52,14 +52,19 @@ export default function SidebarArticles() {
             </SidebarMenuItem>
             {articles.map((article) => (
               <SidebarMenuItem key={article.id}>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton
+                  asChild
+                  className={`${
+                    selectedArticleId === article.id ? "hover:bg-primary" : null
+                  }`}
+                >
                   <div
                     className={`flex justify-between items-center cursor-pointer gap-2 ${
                       selectedArticleId === article.id ? "bg-primary" : null
                     }`}
                     onClick={() => handleArticleSelect(article.id)}
                   >
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0 ">
                       <Newspaper className="size-4 shrink-0" />
                       <ArticleTitle title={article.title} />
                     </div>
