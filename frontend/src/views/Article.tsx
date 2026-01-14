@@ -2,7 +2,7 @@ import { PageLayout } from "@/components/PageContent";
 import { useArticle } from "@/stores/articleStore";
 import MDEditor from "@uiw/react-md-editor";
 import { ArrowLeft } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
 
 export default function Article() {
@@ -15,12 +15,73 @@ export default function Article() {
   const loading = useArticle((state) => state.loading);
   const fetchArticleBySlug = useArticle((state) => state.fetchArticleBySlug);
   const clearCurrentArticle = useArticle((state) => state.clearCurrentArticle);
+  const sessionStartTime = useRef<number | null>(null);
 
+  // Fetch article when route params change
   useEffect(() => {
     if (!username || !articleSlug) return;
     clearCurrentArticle();
     fetchArticleBySlug(username, articleSlug);
   }, [username, articleSlug, fetchArticleBySlug, clearCurrentArticle]);
+
+  // Reset timer when article loads
+  useEffect(() => {
+    if (currentArticle) {
+      sessionStartTime.current = Date.now();
+    }
+  }, [currentArticle, currentArticle?.id]);
+
+  // Track view when user leaves the page
+  useEffect(() => {
+    if (!currentArticle) return;
+
+    const handleBeforeUnload = () => {
+      if (sessionStartTime.current) {
+        const sessionDuration = Math.round(
+          (Date.now() - sessionStartTime.current) / 1000
+        );
+        if (sessionDuration > 0) {
+          const params = new URLSearchParams();
+          params.append("sessionDuration", sessionDuration.toString());
+          const apiUrl =
+            import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+
+          // Use sendBeacon for page unload - it's designed for this
+          navigator.sendBeacon(
+            `${apiUrl}/articles/${currentArticle.id}/track`,
+            params
+          );
+        }
+      }
+    };
+
+    // Also track when navigating away via component cleanup
+    const cleanup = () => {
+      if (sessionStartTime.current) {
+        const sessionDuration = Math.round(
+          (Date.now() - sessionStartTime.current) / 1000
+        );
+        if (sessionDuration > 0) {
+          const params = new URLSearchParams();
+          params.append("sessionDuration", sessionDuration.toString());
+          const apiUrl =
+            import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+
+          fetch(`${apiUrl}/articles/${currentArticle.id}/track`, {
+            method: "POST",
+            body: params,
+            keepalive: true,
+          }).catch(() => {});
+        }
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      cleanup();
+    };
+  }, [currentArticle]);
 
   return (
     <PageLayout

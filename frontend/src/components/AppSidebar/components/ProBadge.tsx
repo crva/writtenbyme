@@ -3,7 +3,7 @@ import { Zap } from "lucide-react";
 
 export default function ProBadge() {
   return (
-    <Badge className="ml-1 bg-primary text-xs/2">
+    <Badge className="ml-2 bg-primary text-xs/2">
       <Zap />
       <span>Pro</span>
     </Badge>

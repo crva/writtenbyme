@@ -91,6 +91,36 @@ Now your local backend can receive webhooks from Polar during payment testing!
 
 ---
 
+## 📊 Analytics
+
+Articles automatically track reader statistics including:
+
+- **Page Views**: Total number of views per article
+- **Reading Time**: Average time spent reading each article
+- **Geographic Data**: Country information from reader IP addresses
+- **Device Info**: Operating system and browser breakdown
+
+Authors can view these analytics in the article editor dashboard:
+
+1. Open an article in edit mode
+2. Click the "Analytics" tab
+3. See detailed statistics about your article's performance
+
+### How Analytics Work
+
+- **View Tracking**: When someone reads your article, a view is recorded with:
+
+  - IP address (converted to country)
+  - Browser and OS information
+  - Session duration
+  - Timestamp
+
+- **Geo-IP Lookup**: Uses geoip-lite library to convert IP addresses to country codes
+- **User Agent Parsing**: Uses ua-parser-js to extract browser and OS information
+- **Privacy**: IP addresses are NOT stored but only used for geolocation
+
+---
+
 ## 🏗️ Architecture
 
 ```

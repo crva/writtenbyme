@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { apiPost } from "@/lib/api";
 import { Loader2, Sparkles } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface PaymentButtonProps {
   isLoading?: boolean;
@@ -23,9 +24,8 @@ export default function PaymentButton({
         // Redirect to Polar checkout
         window.location.href = response.checkoutUrl;
       }
-    } catch (error) {
-      console.error("Failed to create checkout:", error);
-      alert("Failed to initiate payment. Please try again.");
+    } catch {
+      toast.error("Failed to initiate payment. Please try again.");
     } finally {
       setLoading(false);
     }

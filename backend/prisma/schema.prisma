@@ -25,17 +25,33 @@ model User {
 }
 
 model Article {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title     String
-  slug      String   // URL-friendly slug derived from title
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  slug        String        // URL-friendly slug derived from title
+  content     String
+  views       ArticleView[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   @@unique([userId, title])
   @@unique([userId, slug])
   @@index([userId])
+}
+
+model ArticleView {
+  id              String    @id @default(cuid())
+  articleId       String
+  article         Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  userAgent       String
+  country         String?
+  os              String?
+  browser         String?
+  sessionDuration Int?      // duration in seconds
+  createdAt       DateTime  @default(now())
+
+  @@index([articleId])
+  @@index([createdAt])
 }
 
