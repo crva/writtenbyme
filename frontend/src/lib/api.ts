@@ -25,8 +25,23 @@ async function apiCall<T>(
   });
 
   if (!response.ok) {
-    const error = (await response.json()) as { error?: string };
-    throw new Error(error.error || `API Error: ${response.status}`);
+    let errorMessage = `API Error: ${response.status}`;
+
+    try {
+      const error = (await response.json()) as { error?: string };
+      errorMessage = error.error || errorMessage;
+    } catch {
+      // If response is not JSON, try to get text
+      try {
+        const text = await response.text();
+        errorMessage = text || errorMessage;
+      } catch {
+        // If we can't parse anything, use the status message
+        errorMessage = response.statusText || errorMessage;
+      }
+    }
+
+    throw new Error(errorMessage);
   }
 
   return response.json() as Promise<T>;
