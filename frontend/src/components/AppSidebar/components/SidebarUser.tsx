@@ -19,6 +19,7 @@ import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
 import { EllipsisVertical, LogOut, UserCircle, Zap } from "lucide-react";
 import { useState } from "react";
+import ProBadge from "./ProBadge";
 
 export default function SidebarUser() {
   const { user, logout, isAuthenticated } = useUser();
@@ -60,7 +61,10 @@ export default function SidebarUser() {
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.username}</span>
+                <div>
+                  <span className="truncate font-medium">{user.username}</span>
+                  {isPaid && <ProBadge />}
+                </div>
                 <span className="text-muted-foreground truncate text-xs">
                   {user.email}
                 </span>

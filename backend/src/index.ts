@@ -7,6 +7,7 @@ import { sessionMiddleware } from "./config/session";
 import { logger } from "./lib/logger";
 import articlesRoutes from "./routes/articles";
 import authRoutes from "./routes/auth";
+import paymentsRoutes from "./routes/payments";
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use(passport.session());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/articles", articlesRoutes);
+app.use("/api/payments", paymentsRoutes);
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });

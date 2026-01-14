@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import PaymentButton from "@/components/Account/PaymentButton";
 import {
   Dialog,
   DialogContent,
@@ -161,9 +161,7 @@ export default function UpgradeProDialog({ open, onOpenChange }: Props) {
         </div>
 
         {/* CTA Button */}
-        <Button className="w-full rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground py-2 h-auto">
-          Upgrade to Pro - $7.99/month
-        </Button>
+        <PaymentButton />
       </DialogContent>
     </Dialog>
   );
