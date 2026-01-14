@@ -50,13 +50,29 @@ export const register = async (req: AuthRequest, res: Response) => {
       "User registered successfully"
     );
 
-    return res.status(201).json({
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-      },
-      message: "User registered successfully",
+    // Establish session after registration
+    req.login(user as AuthPayload, (err) => {
+      if (err) {
+        logger.error(
+          { error: err },
+          "Session creation error after registration"
+        );
+        return res
+          .status(500)
+          .json({
+            error: "Registration successful but session creation failed",
+          });
+      }
+
+      return res.status(201).json({
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          isPaid: user.isPaid,
+        },
+        message: "User registered successfully",
+      });
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -86,6 +102,7 @@ export const login = (req: AuthRequest, res: Response) => {
         id: user.id,
         username: user.username,
         email: user.email,
+        isPaid: user.isPaid,
       },
       message: "Logged in successfully",
     });
@@ -135,6 +152,7 @@ export const getSession = (req: AuthRequest, res: Response) => {
         id: user.id,
         username: user.username,
         email: user.email,
+        isPaid: user.isPaid,
       },
     });
   } catch (error) {

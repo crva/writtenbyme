@@ -1,5 +1,5 @@
-import type { User } from "@prisma/client";
 import { Request } from "express";
+import type { User } from "../generated/prisma/browser.js";
 
 export type AuthPayload = Omit<User, "password">;
 
@@ -20,6 +20,7 @@ export interface AuthResponse {
     id: string;
     username: string;
     email: string;
+    isPaid: boolean;
   };
   message: string;
 }

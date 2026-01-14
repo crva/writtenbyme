@@ -30,6 +30,7 @@ passport.use(
           id: user.id,
           username: user.username,
           email: user.email,
+          isPaid: user.isPaid,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
         };
@@ -60,6 +61,7 @@ passport.deserializeUser(async (id: string, done) => {
       id: user.id,
       username: user.username,
       email: user.email,
+      isPaid: user.isPaid,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
