@@ -1,3 +1,4 @@
+import UpgradeProDialog from "@/components/Account/UpgradeProDialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -13,13 +14,17 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { usePaidUser } from "@/hooks/usePaidUser";
 import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
-import { CreditCard, EllipsisVertical, LogOut, UserCircle } from "lucide-react";
+import { EllipsisVertical, LogOut, UserCircle, Zap } from "lucide-react";
+import { useState } from "react";
 
 export default function SidebarUser() {
   const { user, logout, isAuthenticated } = useUser();
+  const isPaid = usePaidUser();
   const resetStore = useArticle((state) => state.resetStore);
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
 
   const handleLogout = async () => {
     resetStore();
@@ -90,10 +95,14 @@ export default function SidebarUser() {
                 <UserCircle />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
+              {!isPaid && (
+                <DropdownMenuItem onClick={() => setUpgradeDialogOpen(true)}>
+                  <Zap className="text-primary" />
+                  <span className="text-primary font-semibold">
+                    Upgrade to Pro
+                  </span>
+                </DropdownMenuItem>
+              )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
@@ -103,6 +112,11 @@ export default function SidebarUser() {
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
+
+      <UpgradeProDialog
+        open={upgradeDialogOpen}
+        onOpenChange={setUpgradeDialogOpen}
+      />
     </SidebarMenu>
   );
 }
