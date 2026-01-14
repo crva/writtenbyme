@@ -1,3 +1,4 @@
+import UpgradeProDialog from "@/components/Account/UpgradeProDialog";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -6,6 +7,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { usePaidUser } from "@/hooks/usePaidUser";
 import { useArticle } from "@/stores/articleStore";
 import { Newspaper, PlusCircle } from "lucide-react";
 import { useState } from "react";
@@ -16,10 +18,21 @@ import NewArticleDialog from "./NewArticleDialog";
 export default function SidebarArticles() {
   const { articles, addArticle, selectedArticleId, setSelectedArticle } =
     useArticle();
+  const isPaid = usePaidUser();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
 
   const handleArticleSelect = (id: string) => {
     setSelectedArticle(id);
+  };
+
+  const handleNewArticleClick = () => {
+    // If user is not paid and already has 1 article, show upgrade dialog
+    if (!isPaid && articles.length >= 1) {
+      setUpgradeDialogOpen(true);
+      return;
+    }
+    setDialogOpen(true);
   };
 
   const handleNewArticle = (title: string) => {
@@ -34,6 +47,10 @@ export default function SidebarArticles() {
         onOpenChange={setDialogOpen}
         onConfirm={handleNewArticle}
       />
+      <UpgradeProDialog
+        open={upgradeDialogOpen}
+        onOpenChange={setUpgradeDialogOpen}
+      />
       <SidebarGroup>
         <SidebarGroupLabel>Articles</SidebarGroupLabel>
         <SidebarGroupContent>
@@ -42,7 +59,7 @@ export default function SidebarArticles() {
               <SidebarMenuButton
                 asChild
                 className="text-muted-foreground"
-                onClick={() => setDialogOpen(true)}
+                onClick={() => handleNewArticleClick()}
               >
                 <div className={`cursor-pointer`} onClick={() => {}}>
                   <PlusCircle />
