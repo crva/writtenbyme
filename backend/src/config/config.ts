@@ -10,4 +10,7 @@ export const config = {
     accessToken: process.env.POLAR_ACCESS_TOKEN || "",
     webhookSecret: process.env.POLAR_WEBHOOK_SECRET || "",
   },
+  resend: {
+    apiKey: process.env.RESEND_API_KEY || "",
+  },
 };

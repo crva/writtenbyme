@@ -4,14 +4,13 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useUser } from "@/stores/userStore";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, Mail } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -20,7 +19,7 @@ type Props = {
   onOpenChange: (open: boolean) => void;
 };
 
-type Mode = "login" | "register";
+type Mode = "magic-link" | "email-password" | "register";
 type FieldErrors = {
   username?: string;
   email?: string;
@@ -29,15 +28,19 @@ type FieldErrors = {
 };
 
 // Validation Schemas
-const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
+const magicLinkSchema = z.object({
+  email: z.email("Invalid email address"),
+});
+
+const emailPasswordSchema = z.object({
+  email: z.email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 const registerSchema = z
   .object({
     username: z.string().min(3, "Username must be at least 3 characters"),
-    email: z.string().email("Invalid email address"),
+    email: z.email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string(),
   })
@@ -53,16 +56,18 @@ export default function AccountLoginRegisterDialog({
   const {
     register: userRegister,
     login: userLogin,
+    sendMagicLink,
     isLoading,
     error: storeError,
     clearError,
   } = useUser();
-  const [mode, setMode] = useState<Mode>("login");
+  const [mode, setMode] = useState<Mode>("magic-link");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [username, setUsername] = useState("");
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
 
   // Use store error directly instead of syncing to local state
   const generalError = storeError || "";
@@ -71,8 +76,10 @@ export default function AccountLoginRegisterDialog({
     setErrors({});
 
     try {
-      if (mode === "login") {
-        loginSchema.parse({ email, password });
+      if (mode === "magic-link") {
+        magicLinkSchema.parse({ email });
+      } else if (mode === "email-password") {
+        emailPasswordSchema.parse({ email, password });
       } else {
         registerSchema.parse({ username, email, password, confirmPassword });
       }
@@ -96,14 +103,17 @@ export default function AccountLoginRegisterDialog({
     }
 
     try {
-      if (mode === "login") {
+      if (mode === "magic-link") {
+        await sendMagicLink(email);
+        setMagicLinkSent(true);
+      } else if (mode === "email-password") {
         await userLogin({ email, password });
+        onOpenChange(false);
       } else {
         await userRegister({ username, email, password });
+        onOpenChange(false);
       }
-      // On success, close the dialog
-      onOpenChange(false);
-    } catch (err) {
+    } catch {
       // Error is already set in the store
     }
   };
@@ -114,6 +124,7 @@ export default function AccountLoginRegisterDialog({
     setConfirmPassword("");
     setUsername("");
     setErrors({});
+    setMagicLinkSent(false);
     clearError();
   };
 
@@ -129,10 +140,6 @@ export default function AccountLoginRegisterDialog({
     onOpenChange(newOpen);
   };
 
-  const handleSocialLogin = (_provider: string) => {
-    // Handle social login logic here
-  };
-
   return (
     <Dialog
       open={open}
@@ -144,12 +151,18 @@ export default function AccountLoginRegisterDialog({
       <DialogContent showCloseButton={false}>
         <DialogHeader className="mb-2">
           <DialogTitle>
-            {mode === "login" ? "Login" : "Create Account"}
+            {mode === "magic-link"
+              ? "Sign In with Magic Link"
+              : mode === "email-password"
+              ? "Sign In with Email & Password"
+              : "Create Account"}
           </DialogTitle>
           <DialogDescription>
-            {mode === "login"
-              ? "Sign in to your account"
-              : "Register a new account"}
+            {mode === "magic-link"
+              ? "We'll send you a secure link to sign in"
+              : mode === "email-password"
+              ? "Enter your credentials to sign in"
+              : "Create a new account with email and password"}
           </DialogDescription>
         </DialogHeader>
 
@@ -158,6 +171,16 @@ export default function AccountLoginRegisterDialog({
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{generalError}</AlertDescription>
+          </Alert>
+        )}
+
+        {/* Magic Link Sent Message */}
+        {magicLinkSent && mode === "magic-link" && (
+          <Alert className="bg-green-50 border-green-200">
+            <Mail className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              Check your email for a sign-in link. It will expire in 15 minutes.
+            </AlertDescription>
           </Alert>
         )}
 
@@ -213,30 +236,32 @@ export default function AccountLoginRegisterDialog({
             )}
           </div>
 
-          {/* Password field */}
-          <div className="space-y-1">
-            <Input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                if (errors.password) {
-                  setErrors({ ...errors, password: undefined });
-                }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !isLoading) {
-                  handleSubmit();
-                }
-              }}
-              className={errors.password ? "border-red-500" : ""}
-              disabled={isLoading}
-            />
-            {errors.password && (
-              <p className="text-xs text-red-500">{errors.password}</p>
-            )}
-          </div>
+          {/* Password field - only for email-password and register */}
+          {(mode === "email-password" || mode === "register") && (
+            <div className="space-y-1">
+              <Input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (errors.password) {
+                    setErrors({ ...errors, password: undefined });
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !isLoading) {
+                    handleSubmit();
+                  }
+                }}
+                className={errors.password ? "border-red-500" : ""}
+                disabled={isLoading}
+              />
+              {errors.password && (
+                <p className="text-xs text-red-500">{errors.password}</p>
+              )}
+            </div>
+          )}
 
           {/* Confirm Password field - only for register */}
           {mode === "register" && (
@@ -268,74 +293,85 @@ export default function AccountLoginRegisterDialog({
 
         <Button onClick={handleSubmit} className="w-full" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {mode === "login" ? "Login" : "Register"}
+          {mode === "magic-link"
+            ? "Send Magic Link"
+            : mode === "email-password"
+            ? "Sign In"
+            : "Create Account"}
         </Button>
 
-        {/* Separator with Or text */}
+        {/* Account creation/login prompt - appears right after button */}
+        {mode === "email-password" && (
+          <div className="text-sm text-muted-foreground text-center">
+            Don't have an account?{" "}
+            <button
+              onClick={() => handleModeChange("register")}
+              className="underline text-foreground hover:text-primary"
+              disabled={isLoading}
+            >
+              Register
+            </button>
+          </div>
+        )}
+
+        {mode === "register" && (
+          <div className="text-sm text-muted-foreground text-center">
+            Already have an account?{" "}
+            <button
+              onClick={() => handleModeChange("email-password")}
+              className="underline text-foreground hover:text-primary"
+              disabled={isLoading}
+            >
+              Sign In
+            </button>
+          </div>
+        )}
+
+        {/* Separator */}
         <div className="relative py-2">
           <div className="absolute inset-0 flex items-center">
             <Separator />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="bg-background px-2 text-muted-foreground">Or</span>
+            <span className="bg-background px-2 text-muted-foreground">
+              Other options
+            </span>
           </div>
         </div>
 
-        {/* Social Login Buttons */}
-        <div className="grid grid-cols-3 gap-2">
+        {/* Alternative Authentication Methods */}
+        {mode === "magic-link" && (
           <Button
             variant="outline"
-            onClick={() => handleSocialLogin("Google")}
+            onClick={() => handleModeChange("email-password")}
             className="w-full"
-            disabled={isLoading}
+            disabled={isLoading || magicLinkSent}
           >
-            Google
+            Use Email & Password
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => handleSocialLogin("Apple")}
-            className="w-full"
-            disabled={isLoading}
-          >
-            Apple
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => handleSocialLogin("Facebook")}
-            className="w-full"
-            disabled={isLoading}
-          >
-            Facebook
-          </Button>
-        </div>
+        )}
 
-        <DialogFooter className="flex justify-center! items-center">
-          <div className="text-sm text-muted-foreground">
-            {mode === "login" ? (
-              <>
-                Don't have an account?{" "}
-                <button
-                  onClick={() => handleModeChange("register")}
-                  className="underline text-foreground hover:text-primary"
-                  disabled={isLoading}
-                >
-                  Register
-                </button>
-              </>
-            ) : (
-              <>
-                Already have an account?{" "}
-                <button
-                  onClick={() => handleModeChange("login")}
-                  className="underline text-foreground hover:text-primary"
-                  disabled={isLoading}
-                >
-                  Login
-                </button>
-              </>
-            )}
-          </div>
-        </DialogFooter>
+        {mode === "email-password" && (
+          <Button
+            variant="outline"
+            onClick={() => handleModeChange("magic-link")}
+            className="w-full"
+            disabled={isLoading}
+          >
+            Use Magic Link
+          </Button>
+        )}
+
+        {mode === "register" && (
+          <Button
+            variant="outline"
+            onClick={() => handleModeChange("magic-link")}
+            className="w-full"
+            disabled={isLoading}
+          >
+            Use Magic Link
+          </Button>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -19,6 +19,22 @@ export const usersTable = pgTable("User", {
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
 
+export const magicLinksTable = pgTable(
+  "MagicLink",
+  {
+    id: text("id").primaryKey(),
+    email: text("email").notNull(),
+    token: text("token").unique().notNull(),
+    expiresAt: timestamp("expiresAt").notNull(),
+    used: boolean("used").default(false).notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => [
+    index("MagicLink_email_idx").on(table.email),
+    index("MagicLink_token_idx").on(table.token),
+  ]
+);
+
 export const articlesTable = pgTable(
   "Article",
   {

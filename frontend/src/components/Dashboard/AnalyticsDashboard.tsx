@@ -38,7 +38,6 @@ export default function AnalyticsDashboard({
         const errorMsg =
           err instanceof Error ? err.message : "Error loading analytics";
         setError(errorMsg);
-        console.error("Analytics error:", err);
       } finally {
         setLoading(false);
       }

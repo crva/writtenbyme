@@ -12,6 +12,8 @@ type UserStoreState = {
 type UserStoreActions = {
   register: (payload: RegisterPayload) => Promise<void>;
   login: (payload: LoginPayload) => Promise<void>;
+  sendMagicLink: (email: string) => Promise<void>;
+  verifyMagicLink: (token: string) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   clearError: () => void;
@@ -67,10 +69,44 @@ export const useUser = create<UserStore>((set) => ({
     }
   },
 
+  sendMagicLink: async (email: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      await apiPost<{ message: string }>("/auth/magic-link/send", { email });
+      set({ isLoading: false, error: null });
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to send magic link";
+      set({ error: errorMessage, isLoading: false });
+      throw err;
+    }
+  },
+
+  verifyMagicLink: async (token: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const data = await apiPost<{ user: User }>("/auth/magic-link/verify", {
+        token,
+      });
+
+      set({
+        user: data.user,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      });
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to verify magic link";
+      set({ error: errorMessage, isLoading: false });
+      throw err;
+    }
+  },
+
   logout: async () => {
     try {
       await apiPost<{ success: boolean }>("/auth/signout");
-    } catch (err) {
+    } catch {
       // Continue logout even if API call fails
     } finally {
       // Always clear the local state even if API call fails
@@ -86,7 +122,7 @@ export const useUser = create<UserStore>((set) => ({
         isAuthenticated: true,
         error: null,
       });
-    } catch (err) {
+    } catch {
       set({ user: null, isAuthenticated: false });
     }
   },

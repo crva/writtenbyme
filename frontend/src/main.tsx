@@ -9,6 +9,7 @@ import { ThemeProvider } from "./components/ThemeProvider.tsx";
 import "./index.css";
 import Article from "./views/Article.tsx";
 import Dashboard from "./views/Dashboard.tsx";
+import MagicLinkVerify from "./views/MagicLinkVerify.tsx";
 import UserArticles from "./views/UserArticles.tsx";
 
 createRoot(document.getElementById("root")!).render(
@@ -17,6 +18,7 @@ createRoot(document.getElementById("root")!).render(
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<App />} />
+          <Route path="/auth/magic-link" element={<MagicLinkVerify />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/:username" element={<UserArticles />} />
           <Route path="/:username/:articleSlug" element={<Article />} />

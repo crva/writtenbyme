@@ -1,6 +1,13 @@
 import { Request, Response, Router } from "express";
 import passport from "passport";
-import { getSession, login, logout, register } from "../controllers/auth";
+import {
+  getSession,
+  login,
+  logout,
+  register,
+  sendMagicLink,
+  verifyMagicLink,
+} from "../controllers/auth";
 import { requireAuth } from "../middleware/auth";
 
 const router = Router();
@@ -29,6 +36,10 @@ router.post("/signin", (req: Request, res: Response, next) => {
     }
   )(req, res, next);
 });
+
+router.post("/magic-link/send", sendMagicLink);
+
+router.post("/magic-link/verify", verifyMagicLink);
 
 router.post("/signout", logout);
 
