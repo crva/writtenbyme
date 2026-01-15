@@ -1,3 +1,4 @@
+import AccountSettings from "@/components/Account/AccountSettings";
 import UpgradeProDialog from "@/components/Account/UpgradeProDialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -26,6 +27,7 @@ export default function SidebarUser() {
   const isPaid = usePaidUser();
   const resetStore = useArticle((state) => state.resetStore);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const [accountSettingsOpen, setAccountSettingsOpen] = useState(false);
 
   const handleLogout = async () => {
     resetStore();
@@ -95,7 +97,7 @@ export default function SidebarUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setAccountSettingsOpen(true)}>
                 <UserCircle />
                 Account
               </DropdownMenuItem>
@@ -120,6 +122,11 @@ export default function SidebarUser() {
       <UpgradeProDialog
         open={upgradeDialogOpen}
         onOpenChange={setUpgradeDialogOpen}
+      />
+
+      <AccountSettings
+        open={accountSettingsOpen}
+        onOpenChange={setAccountSettingsOpen}
       />
     </SidebarMenu>
   );

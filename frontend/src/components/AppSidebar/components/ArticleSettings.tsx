@@ -1,4 +1,5 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import ConfirmDialog from "@/components/ui/confirm-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,6 +43,7 @@ export default function ArticleSettings({ articleId }: Props) {
   const { user } = useUser();
 
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [saveError, setSaveError] = useState<string>("");
 
   const article = articles.find((a) => a.id === articleId);
@@ -60,7 +62,12 @@ export default function ArticleSettings({ articleId }: Props) {
   };
 
   const handleDelete = () => {
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
     removeArticle(articleId);
+    setDeleteConfirmOpen(false);
   };
 
   const handleView = () => {
@@ -136,6 +143,16 @@ export default function ArticleSettings({ articleId }: Props) {
           onOpenChange={setRenameDialogOpen}
         />
       </DropdownMenu>
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title="Delete Article?"
+        description={`Are you sure you want to delete "${article?.title}"? This action cannot be undone.`}
+        confirmText="Delete Article"
+        cancelText="Cancel"
+        isDestructive={true}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }

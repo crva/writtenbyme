@@ -16,6 +16,8 @@ type UserStoreActions = {
   verifyMagicLink: (token: string) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  updateUsername: (username: string) => Promise<void>;
+  deleteAccount: () => Promise<void>;
   clearError: () => void;
 };
 
@@ -124,6 +126,43 @@ export const useUser = create<UserStore>((set) => ({
       });
     } catch {
       set({ user: null, isAuthenticated: false });
+    }
+  },
+
+  updateUsername: async (username: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const data = await apiPost<{ user: User }>("/user/update-username", {
+        username,
+      });
+      set({
+        user: data.user,
+        isLoading: false,
+        error: null,
+      });
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to update username";
+      set({ error: errorMessage, isLoading: false });
+      throw err;
+    }
+  },
+
+  deleteAccount: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      await apiPost<{ success: boolean }>("/user/delete-account", {});
+      set({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: null,
+      });
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to delete account";
+      set({ error: errorMessage, isLoading: false });
+      throw err;
     }
   },
 

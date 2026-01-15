@@ -9,6 +9,7 @@ import analyticsRoutes from "./routes/analytics";
 import articlesRoutes from "./routes/articles";
 import authRoutes from "./routes/auth";
 import paymentsRoutes from "./routes/payments";
+import userRoutes from "./routes/user";
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
 app.use("/api/articles", analyticsRoutes);
 app.use("/api/articles", articlesRoutes);
 app.use("/api/payments", paymentsRoutes);
