@@ -1,16 +1,37 @@
 import pgSession from "connect-pg-simple";
 import session from "express-session";
 import { Pool } from "pg";
+import { logger } from "../lib/logger";
 import { config } from "./config";
+
+logger.info("Creating PostgreSQL session pool...");
 
 const pgPool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
+pgPool.on("connect", () => {
+  logger.info("PostgreSQL session pool connection established");
+});
+
+pgPool.on("error", (err) => {
+  logger.error({ error: err }, "PostgreSQL session pool connection error");
+});
+
+logger.info("Initializing session store...");
+
 const sessionStore = new (pgSession(session))({
   pool: pgPool,
   tableName: "Session",
   createTableIfMissing: true,
+});
+
+sessionStore.on("connect", () => {
+  logger.info("Session store connected to PostgreSQL");
+});
+
+sessionStore.on("error", (err) => {
+  logger.error({ error: err }, "Session store PostgreSQL error");
 });
 
 export const sessionMiddleware = session({
