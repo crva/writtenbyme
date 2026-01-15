@@ -1,8 +1,10 @@
 import bcrypt from "bcryptjs";
+import { eq, or } from "drizzle-orm";
 import { Response } from "express";
 import { z } from "zod";
+import { usersTable } from "../db/schema";
+import { db } from "../lib/db";
 import { logger } from "../lib/logger";
-import { prisma } from "../lib/prisma";
 import { AuthPayload, AuthRequest } from "../types/auth";
 
 const registerSchema = z.object({
@@ -19,13 +21,17 @@ export const register = async (req: AuthRequest, res: Response) => {
       "Registration attempt"
     );
 
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        OR: [{ email: data.email }, { username: data.username }],
-      },
-    });
+    const existingUsers = await db
+      .select()
+      .from(usersTable)
+      .where(
+        or(
+          eq(usersTable.email, data.email),
+          eq(usersTable.username, data.username)
+        )
+      );
 
-    if (existingUser) {
+    if (existingUsers.length > 0) {
       logger.warn(
         { email: data.email },
         "Registration failed: User already exists"
@@ -37,13 +43,18 @@ export const register = async (req: AuthRequest, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    const user = await prisma.user.create({
-      data: {
+    const insertResult = await db
+      .insert(usersTable)
+      .values({
+        id: crypto.randomUUID(),
         username: data.username,
         email: data.email,
         password: hashedPassword,
-      },
-    });
+        isPaid: false,
+      })
+      .returning();
+
+    const user = insertResult[0];
 
     logger.info(
       { userId: user.id, username: user.username },
@@ -57,11 +68,9 @@ export const register = async (req: AuthRequest, res: Response) => {
           { error: err },
           "Session creation error after registration"
         );
-        return res
-          .status(500)
-          .json({
-            error: "Registration successful but session creation failed",
-          });
+        return res.status(500).json({
+          error: "Registration successful but session creation failed",
+        });
       }
 
       return res.status(201).json({

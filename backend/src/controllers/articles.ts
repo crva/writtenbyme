@@ -1,7 +1,9 @@
+import { and, desc, eq, not } from "drizzle-orm";
 import { Response } from "express";
 import { z } from "zod";
+import { articlesTable, usersTable } from "../db/schema";
+import { db } from "../lib/db";
 import { logger } from "../lib/logger";
-import { prisma } from "../lib/prisma";
 import { generateSlug } from "../lib/slug";
 import { AuthRequest } from "../types/auth";
 
@@ -23,15 +25,18 @@ async function generateUniqueSlug(
   const maxAttempts = 100;
 
   while (count < maxAttempts) {
-    const existing = await prisma.article.findFirst({
-      where: {
-        userId,
-        slug,
-        ...(excludeId ? { NOT: { id: excludeId } } : {}),
-      },
-    });
+    const existing = await db
+      .select()
+      .from(articlesTable)
+      .where(
+        and(
+          eq(articlesTable.userId, userId),
+          eq(articlesTable.slug, slug),
+          excludeId ? not(eq(articlesTable.id, excludeId)) : undefined
+        )
+      );
 
-    if (!existing) {
+    if (existing.length === 0) {
       return slug;
     }
 
@@ -53,14 +58,17 @@ export const createArticle = async (req: AuthRequest, res: Response) => {
     const data = articleSchema.parse(req.body);
 
     // Check if title already exists for this user
-    const existingArticle = await prisma.article.findFirst({
-      where: {
-        userId: req.user.id,
-        title: data.title,
-      },
-    });
+    const existingArticles = await db
+      .select()
+      .from(articlesTable)
+      .where(
+        and(
+          eq(articlesTable.userId, req.user.id),
+          eq(articlesTable.title, data.title)
+        )
+      );
 
-    if (existingArticle) {
+    if (existingArticles.length > 0) {
       logger.warn(
         { userId: req.user.id, title: data.title },
         "Article creation failed: title already exists"
@@ -72,14 +80,18 @@ export const createArticle = async (req: AuthRequest, res: Response) => {
 
     const slug = await generateUniqueSlug(req.user.id, data.title);
 
-    const article = await prisma.article.create({
-      data: {
+    const insertResult = await db
+      .insert(articlesTable)
+      .values({
+        id: crypto.randomUUID(),
         userId: req.user.id,
         title: data.title,
         slug: slug,
         content: data.content,
-      },
-    });
+      })
+      .returning();
+
+    const article = insertResult[0];
 
     logger.info(
       {
@@ -123,9 +135,12 @@ export const updateArticle = async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     const data = articleSchema.parse(req.body);
 
-    const article = await prisma.article.findUnique({
-      where: { id },
-    });
+    const articles = await db
+      .select()
+      .from(articlesTable)
+      .where(eq(articlesTable.id, id));
+
+    const article = articles[0];
 
     if (!article) {
       logger.warn(
@@ -145,14 +160,18 @@ export const updateArticle = async (req: AuthRequest, res: Response) => {
 
     const slug = await generateUniqueSlug(req.user.id, data.title, id);
 
-    const updated = await prisma.article.update({
-      where: { id },
-      data: {
+    const updateResult = await db
+      .update(articlesTable)
+      .set({
         title: data.title,
         slug: slug,
         content: data.content,
-      },
-    });
+        updatedAt: new Date(),
+      })
+      .where(eq(articlesTable.id, id))
+      .returning();
+
+    const updated = updateResult[0];
 
     logger.info(
       {
@@ -202,9 +221,12 @@ export const deleteArticle = async (req: AuthRequest, res: Response) => {
 
     const { id } = req.params;
 
-    const article = await prisma.article.findUnique({
-      where: { id },
-    });
+    const articles = await db
+      .select()
+      .from(articlesTable)
+      .where(eq(articlesTable.id, id));
+
+    const article = articles[0];
 
     if (!article) {
       logger.warn(
@@ -222,9 +244,7 @@ export const deleteArticle = async (req: AuthRequest, res: Response) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
-    await prisma.article.delete({
-      where: { id },
-    });
+    await db.delete(articlesTable).where(eq(articlesTable.id, id));
 
     logger.info(
       { userId: req.user.id, articleId: id, title: article.title },
@@ -245,31 +265,27 @@ export const getUserArticles = async (req: AuthRequest, res: Response) => {
   try {
     const { username } = req.params;
 
-    const user = await prisma.user.findUnique({
-      where: { username },
-      include: {
-        articles: {
-          select: {
-            id: true,
-            title: true,
-            updatedAt: true,
-            slug: true,
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
-        },
-      },
-    });
+    const users = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.username, username));
+
+    const user = users[0];
 
     if (!user) {
       logger.debug({ username }, "User articles fetch: user not found");
       return res.status(404).json({ error: "User not found" });
     }
 
+    const articles = await db
+      .select()
+      .from(articlesTable)
+      .where(eq(articlesTable.userId, user.id))
+      .orderBy(desc(articlesTable.createdAt));
+
     res.json({
       username: user.username,
-      articles: user.articles.map((article) => ({
+      articles: articles.map((article) => ({
         id: article.id,
         title: article.title,
         updatedAt: article.updatedAt.toISOString(),
@@ -289,21 +305,29 @@ export const getArticleBySlug = async (req: AuthRequest, res: Response) => {
   try {
     const { username, articleSlug } = req.params;
 
-    const user = await prisma.user.findUnique({
-      where: { username },
-    });
+    const users = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.username, username));
+
+    const user = users[0];
 
     if (!user) {
       logger.debug({ username }, "Article fetch: user not found");
       return res.status(404).json({ error: "User not found" });
     }
 
-    const article = await prisma.article.findFirst({
-      where: {
-        userId: user.id,
-        slug: articleSlug.toLowerCase(),
-      },
-    });
+    const articles = await db
+      .select()
+      .from(articlesTable)
+      .where(
+        and(
+          eq(articlesTable.userId, user.id),
+          eq(articlesTable.slug, articleSlug.toLowerCase())
+        )
+      );
+
+    const article = articles[0];
 
     if (!article) {
       logger.debug(
@@ -343,22 +367,11 @@ export const getMyArticles = async (req: AuthRequest, res: Response) => {
       return res.status(401).json({ error: "Not authenticated" });
     }
 
-    const articles = await prisma.article.findMany({
-      where: {
-        userId: req.user.id,
-      },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        content: true,
-        updatedAt: true,
-        createdAt: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    const articles = await db
+      .select()
+      .from(articlesTable)
+      .where(eq(articlesTable.userId, req.user.id))
+      .orderBy(desc(articlesTable.createdAt));
 
     logger.debug(
       { userId: req.user.id, articleCount: articles.length },

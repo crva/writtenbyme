@@ -25,7 +25,7 @@ docker-compose up -d
 ```bash
 cd backend
 npm install
-npx prisma migrate dev
+npm run db:push
 npm run dev
 ```
 
@@ -128,7 +128,7 @@ Frontend (React + Zustand)
     ↓
 API Client (Generic fetch wrapper)
     ↓
-Backend (Express + Auth.js)
+Backend (Express + PassportJS)
     ↓
 Database (PostgreSQL)
 ```

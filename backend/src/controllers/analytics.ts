@@ -1,8 +1,10 @@
-import { logger } from "@/lib/logger";
-import { prisma } from "@/lib/prisma";
-import { getCountryFromIP } from "@/services/geoip";
-import { parseUserAgent } from "@/services/userAgent";
+import { desc, eq } from "drizzle-orm";
 import { Request, Response } from "express";
+import { articlesTable, articleViewsTable, usersTable } from "../db/schema";
+import { db } from "../lib/db";
+import { logger } from "../lib/logger";
+import { getCountryFromIP } from "../services/geoip";
+import { parseUserAgent } from "../services/userAgent";
 
 export async function trackArticleView(req: Request, res: Response) {
   try {
@@ -33,8 +35,10 @@ export async function trackArticleView(req: Request, res: Response) {
     const country = getCountryFromIP(ipAddress);
 
     // Create article view record
-    const view = await prisma.articleView.create({
-      data: {
+    const insertResult = await db
+      .insert(articleViewsTable)
+      .values({
+        id: crypto.randomUUID(),
         articleId,
         userAgent,
         country,
@@ -42,8 +46,10 @@ export async function trackArticleView(req: Request, res: Response) {
         browser,
         sessionDuration:
           sessionDuration && !isNaN(sessionDuration) ? sessionDuration : null,
-      },
-    });
+      })
+      .returning();
+
+    const view = insertResult[0];
 
     logger.info(
       {
@@ -94,21 +100,23 @@ export async function getArticleAnalytics(req: Request, res: Response) {
     }
 
     // Get all views for this article
-    const article = await prisma.article.findUnique({
-      where: { id: articleId },
-    });
+    const articles = await db
+      .select()
+      .from(articlesTable)
+      .where(eq(articlesTable.id, articleId));
+
+    const article = articles[0];
 
     if (!article) {
       logger.warn({ articleId }, "Analytics request for non-existent article");
       return res.status(404).json({ error: "Article not found" });
     }
 
-    const views = await prisma.articleView.findMany({
-      where: { articleId },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    const views = await db
+      .select()
+      .from(articleViewsTable)
+      .where(eq(articleViewsTable.articleId, articleId))
+      .orderBy(desc(articleViewsTable.createdAt));
 
     // Check if user owns the article
     if (article.userId !== userId) {
@@ -120,9 +128,12 @@ export async function getArticleAnalytics(req: Request, res: Response) {
     }
 
     // Get user and check if they have paid access
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
+    const users = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, userId));
+
+    const user = users[0];
 
     if (!user || !user.isPaid) {
       logger.warn({ userId, articleId }, "Analytics request: user not paid");

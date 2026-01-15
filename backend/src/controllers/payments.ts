@@ -1,9 +1,11 @@
 import { Polar } from "@polar-sh/sdk";
 import crypto from "crypto";
+import { eq } from "drizzle-orm";
 import { Response } from "express";
 import { config } from "../config/config";
+import { usersTable } from "../db/schema";
+import { db } from "../lib/db";
 import { logger } from "../lib/logger";
-import { prisma } from "../lib/prisma";
 import { AuthRequest } from "../types/auth";
 
 // Use sandbox environment for testing
@@ -112,10 +114,10 @@ export const handleWebhook = async (
       }
 
       // Update user as paid
-      await prisma.user.update({
-        where: { id: metadata.userId },
-        data: { isPaid: true },
-      });
+      await db
+        .update(usersTable)
+        .set({ isPaid: true })
+        .where(eq(usersTable.id, metadata.userId));
 
       logger.info(
         { userId: metadata.userId, subscriptionId: event.data.id },
@@ -136,10 +138,10 @@ export const handleWebhook = async (
       }
 
       // Update user as not paid
-      await prisma.user.update({
-        where: { id: metadata.userId },
-        data: { isPaid: false },
-      });
+      await db
+        .update(usersTable)
+        .set({ isPaid: false })
+        .where(eq(usersTable.id, metadata.userId));
 
       logger.info(
         { userId: metadata.userId, subscriptionId: event.data.id },

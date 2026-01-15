@@ -1,7 +1,9 @@
 import bcrypt from "bcryptjs";
+import { eq } from "drizzle-orm";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import { prisma } from "../lib/prisma";
+import { usersTable } from "../db/schema";
+import { db } from "../lib/db";
 import type { AuthPayload } from "../types/auth";
 
 passport.use(
@@ -12,9 +14,12 @@ passport.use(
     },
     async (email, password, done) => {
       try {
-        const user = await prisma.user.findUnique({
-          where: { email },
-        });
+        const users = await db
+          .select()
+          .from(usersTable)
+          .where(eq(usersTable.email, email));
+
+        const user = users[0];
 
         if (!user) {
           return done(null, false, { message: "Invalid credentials" });
@@ -49,9 +54,12 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id: string, done) => {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id },
-    });
+    const users = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, id));
+
+    const user = users[0];
 
     if (!user) {
       return done(null, null);

@@ -1,5 +1,8 @@
 import { Request } from "express";
-import type { User } from "../generated/prisma/browser.js";
+import { usersTable } from "../db/schema";
+
+// Infer User type from Drizzle schema
+type User = typeof usersTable.$inferSelect;
 
 export type AuthPayload = Omit<User, "password">;
 
