@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useUser } from "@/stores/userStore";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 
 export default function MagicLinkVerify() {
@@ -13,13 +13,16 @@ export default function MagicLinkVerify() {
   const [isLoading, setIsLoading] = useState(true);
   const [verified, setVerified] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const verificationAttempted = useRef(false);
 
   const token = searchParams.get("token");
 
   useEffect(() => {
-    if (!token) {
+    if (!token || verificationAttempted.current) {
       return;
     }
+
+    verificationAttempted.current = true;
 
     const verify = async () => {
       try {
