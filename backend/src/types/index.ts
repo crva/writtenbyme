@@ -1,6 +1,6 @@
 // Auth types
 export type { AuthRequest, AuthResponse } from "./auth";
-export type { AuthPayload, LoginPayload, RegisterPayload, User } from "./user";
+export type { AuthPayload, User } from "./user";
 
 // Article types
 export type {

@@ -1,4 +1,4 @@
-import AccountLoginRegisterDialog from "@/components/Account/AccountLoginRegisterDialog";
+import MagicLinkDialog from "@/components/Account/MagicLinkDialog";
 import AppSidebar from "@/components/AppSidebar/AppSidebar";
 import ArticleEditor from "@/components/Dashboard/ArticleEditor/ArticleEditor";
 import { Button } from "@/components/ui/button";
@@ -59,7 +59,7 @@ export default function Dashboard() {
   return (
     <SidebarProvider>
       {!isAuthenticated && isInitialized && (
-        <AccountLoginRegisterDialog open={true} onOpenChange={() => {}} />
+        <MagicLinkDialog open={true} onOpenChange={() => {}} />
       )}
       <Dialog
         open={showPaymentProcessingDialog}

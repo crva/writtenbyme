@@ -1,5 +1,5 @@
 import { apiGet, apiPost } from "@/lib/api";
-import type { LoginPayload, RegisterPayload, User } from "@/types/user";
+import type { User } from "@/types/user";
 import { create } from "zustand";
 
 type UserStoreState = {
@@ -10,8 +10,6 @@ type UserStoreState = {
 };
 
 type UserStoreActions = {
-  register: (payload: RegisterPayload) => Promise<void>;
-  login: (payload: LoginPayload) => Promise<void>;
   sendMagicLink: (email: string) => Promise<void>;
   verifyMagicLink: (token: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -31,46 +29,6 @@ export const useUser = create<UserStore>((set) => ({
   isAuthenticated: false,
 
   // Actions
-  register: async (payload: RegisterPayload) => {
-    set({ isLoading: true, error: null });
-    try {
-      const data = await apiPost<{ user: User }>("/auth/register", payload);
-
-      set({
-        user: data.user,
-        isAuthenticated: true,
-        isLoading: false,
-        error: null,
-      });
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "An error occurred during registration";
-      set({ error: errorMessage, isLoading: false });
-      throw err;
-    }
-  },
-
-  login: async (payload: LoginPayload) => {
-    set({ isLoading: true, error: null });
-    try {
-      const data = await apiPost<{ user: User }>("/auth/signin", payload);
-
-      set({
-        user: data.user,
-        isAuthenticated: true,
-        isLoading: false,
-        error: null,
-      });
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An error occurred during login";
-      set({ error: errorMessage, isLoading: false });
-      throw err;
-    }
-  },
-
   sendMagicLink: async (email: string) => {
     set({ isLoading: true, error: null });
     try {
