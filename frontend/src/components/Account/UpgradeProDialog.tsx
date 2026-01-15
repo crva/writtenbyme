@@ -111,7 +111,7 @@ export default function UpgradeProDialog({ open, onOpenChange }: Props) {
               {/* Price */}
               <div className="space-y-1">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold">$7.99</span>
+                  <span className="text-4xl font-bold">$5.99</span>
                   <span className="text-muted-foreground text-sm">/month</span>
                 </div>
                 <p className="text-xs text-muted-foreground">

@@ -42,7 +42,7 @@ export default function PaymentButton({
       ) : (
         <Sparkles className="mr-2 size-4" />
       )}
-      {loading || isLoading ? "Processing..." : "Upgrade to Pro - $7.99/month"}
+      {loading || isLoading ? "Processing..." : "Upgrade to Pro - $5.99/month"}
     </Button>
   );
 }

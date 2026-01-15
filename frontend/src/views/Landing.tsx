@@ -270,7 +270,7 @@ export default function Landing() {
                   <div className="space-y-2">
                     <div className="flex items-baseline gap-2">
                       <span className="text-5xl md:text-6xl font-bold">
-                        $7.99
+                        $5.99
                       </span>
                       <span className="text-muted-foreground text-lg">
                         /month
