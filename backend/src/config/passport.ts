@@ -4,7 +4,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { usersTable } from "../db/schema";
 import { db } from "../lib/db";
-import type { AuthPayload } from "../types/auth";
+import type { AuthPayload } from "../types/user";
 
 passport.use(
   new LocalStrategy(

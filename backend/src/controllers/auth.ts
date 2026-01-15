@@ -5,7 +5,8 @@ import { z } from "zod";
 import { usersTable } from "../db/schema";
 import { db } from "../lib/db";
 import { logger } from "../lib/logger";
-import { AuthPayload, AuthRequest } from "../types/auth";
+import { AuthRequest } from "../types/auth";
+import { AuthPayload } from "../types/user";
 
 const registerSchema = z.object({
   username: z.string().min(3).max(30),

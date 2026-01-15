@@ -1,10 +1,5 @@
 import { Request } from "express";
-import { usersTable } from "../db/schema";
-
-// Infer User type from Drizzle schema
-type User = typeof usersTable.$inferSelect;
-
-export type AuthPayload = Omit<User, "password">;
+import { AuthPayload } from "./user";
 
 declare global {
   namespace Express {
@@ -26,12 +21,4 @@ export interface AuthResponse {
     isPaid: boolean;
   };
   message: string;
-}
-
-export interface ArticleResponse {
-  id: string;
-  title: string;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
 }
