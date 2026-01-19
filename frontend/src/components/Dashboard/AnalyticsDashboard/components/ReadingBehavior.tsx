@@ -30,13 +30,15 @@ export function ReadingBehavior({
             Reading Time Distribution
           </h4>
           <div className="space-y-3">
-            {readingTimeDistribution.map((item) => (
-              <DistributionBar
-                key={item.range}
-                label={item.range}
-                percentage={item.percentage}
-              />
-            ))}
+            {readingTimeDistribution
+              .filter((item) => item.count > 0)
+              .map((item) => (
+                <DistributionBar
+                  key={item.range}
+                  label={item.range}
+                  percentage={item.percentage}
+                />
+              ))}
           </div>
           <p className="mt-4 text-xs text-slate-500 dark:text-slate-500">
             This shows how many readers spent different amounts of time on your

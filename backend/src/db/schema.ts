@@ -31,7 +31,7 @@ export const magicLinksTable = pgTable(
   (table) => [
     index("MagicLink_email_idx").on(table.email),
     index("MagicLink_token_idx").on(table.token),
-  ]
+  ],
 );
 
 export const articlesTable = pgTable(
@@ -49,7 +49,7 @@ export const articlesTable = pgTable(
     index("Article_userId_idx").on(table.userId),
     uniqueIndex("Article_userId_title_key").on(table.userId, table.title),
     uniqueIndex("Article_userId_slug_key").on(table.userId, table.slug),
-  ]
+  ],
 );
 
 export const articleViewsTable = pgTable(
@@ -62,12 +62,13 @@ export const articleViewsTable = pgTable(
     os: text("os"),
     browser: text("browser"),
     sessionDuration: integer("sessionDuration"),
+    maxScrollPercentage: integer("maxScrollPercentage").default(0).notNull(),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   (table) => [
     index("ArticleView_articleId_idx").on(table.articleId),
     index("ArticleView_createdAt_idx").on(table.createdAt),
-  ]
+  ],
 );
 
 // Relations
@@ -90,5 +91,5 @@ export const articleViewsRelations = relations(
       fields: [articleViewsTable.articleId],
       references: [articlesTable.id],
     }),
-  })
+  }),
 );

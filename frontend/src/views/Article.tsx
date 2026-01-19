@@ -16,6 +16,7 @@ export default function Article() {
   const fetchArticleBySlug = useArticle((state) => state.fetchArticleBySlug);
   const clearCurrentArticle = useArticle((state) => state.clearCurrentArticle);
   const sessionStartTime = useRef<number | null>(null);
+  const maxScrollPercentageRef = useRef<number>(0);
 
   // Fetch article when route params change
   useEffect(() => {
@@ -28,8 +29,28 @@ export default function Article() {
   useEffect(() => {
     if (currentArticle) {
       sessionStartTime.current = Date.now();
+      maxScrollPercentageRef.current = 0;
     }
   }, [currentArticle, currentArticle?.id]);
+
+  // Track scroll depth
+  useEffect(() => {
+    if (!currentArticle) return;
+
+    const handleScroll = () => {
+      const scrollHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
+      const scrolled =
+        scrollHeight > 0 ? (window.scrollY / scrollHeight) * 100 : 0;
+      maxScrollPercentageRef.current = Math.max(
+        maxScrollPercentageRef.current,
+        scrolled,
+      );
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [currentArticle]);
 
   // Track view when user leaves the page
   useEffect(() => {
@@ -38,18 +59,22 @@ export default function Article() {
     const handleBeforeUnload = () => {
       if (sessionStartTime.current) {
         const sessionDuration = Math.round(
-          (Date.now() - sessionStartTime.current) / 1000
+          (Date.now() - sessionStartTime.current) / 1000,
         );
         if (sessionDuration > 0) {
           const params = new URLSearchParams();
           params.append("sessionDuration", sessionDuration.toString());
+          params.append(
+            "maxScrollPercentage",
+            Math.round(maxScrollPercentageRef.current).toString(),
+          );
           const apiUrl =
             import.meta.env.VITE_API_URL || "http://localhost:3001/api";
 
           // Use sendBeacon for page unload - it's designed for this
           navigator.sendBeacon(
             `${apiUrl}/articles/${currentArticle.id}/track`,
-            params
+            params,
           );
         }
       }
@@ -59,11 +84,15 @@ export default function Article() {
     const cleanup = () => {
       if (sessionStartTime.current) {
         const sessionDuration = Math.round(
-          (Date.now() - sessionStartTime.current) / 1000
+          (Date.now() - sessionStartTime.current) / 1000,
         );
         if (sessionDuration > 0) {
           const params = new URLSearchParams();
           params.append("sessionDuration", sessionDuration.toString());
+          params.append(
+            "maxScrollPercentage",
+            Math.round(maxScrollPercentageRef.current).toString(),
+          );
           const apiUrl =
             import.meta.env.VITE_API_URL || "http://localhost:3001/api";
 

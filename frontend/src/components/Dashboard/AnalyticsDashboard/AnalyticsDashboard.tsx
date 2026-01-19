@@ -17,53 +17,12 @@ interface AnalyticsDashboardProps {
   articleId: string;
 }
 
-// Generate daily views data for chart
-const generateDailyViewsData = (
-  _stats: Analytics["stats"],
-  timeRange: "24h" | "7d" | "30d" | "all",
-) => {
-  let daysToShow = 7;
-
-  if (timeRange === "24h") daysToShow = 1;
-  else if (timeRange === "7d") daysToShow = 7;
-  else if (timeRange === "30d") daysToShow = 30;
-  else daysToShow = 90;
-
-  const data = [];
-  for (let i = daysToShow - 1; i >= 0; i--) {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
-    const dayNum = date.getDate();
-    // Generate random views between 1 and 50
-    const views = Math.floor(Math.random() * 50) + 1;
-    data.push({
-      day: `${dayName} ${dayNum}`,
-      views: views,
-    });
-  }
-  return data;
-};
-
 // Simulated computed metrics (would come from backend in production)
 const computeMetrics = (stats: Analytics["stats"]) => {
-  const totalViews = stats.totalViews || 0;
-
-  // Simulate metrics that would be calculated server-side
-  const completionRate = Math.max(30 + Math.random() * 40, 0); // 30-70%
-
-  // Reading time distribution (simulated)
-  const readingTimeDistribution = [
-    { range: "< 10s", count: Math.floor(totalViews * 0.15), percentage: 15 },
-    { range: "10–30s", count: Math.floor(totalViews * 0.25), percentage: 25 },
-    { range: "30–60s", count: Math.floor(totalViews * 0.3), percentage: 30 },
-    { range: "1–3 min", count: Math.floor(totalViews * 0.2), percentage: 20 },
-    { range: "3+ min", count: Math.floor(totalViews * 0.1), percentage: 10 },
-  ];
-
   return {
-    completionRate,
-    readingTimeDistribution,
+    completionRate: stats.completionRate,
+    avgScrollPercentage: stats.avgScrollPercentage,
+    readingTimeDistribution: stats.readingTimeDistribution,
   };
 };
 
@@ -81,7 +40,7 @@ export default function AnalyticsDashboard({
     const fetchAnalytics = async () => {
       try {
         setLoading(true);
-        const data = await getArticleAnalytics(articleId);
+        const data = await getArticleAnalytics(articleId, timeRange);
         if (data) {
           setAnalytics(data);
           setError(null);
@@ -100,7 +59,7 @@ export default function AnalyticsDashboard({
     };
 
     fetchAnalytics();
-  }, [articleId]);
+  }, [articleId, timeRange]);
 
   if (loading) {
     return (
@@ -158,7 +117,7 @@ export default function AnalyticsDashboard({
     .sort((a, b) => b.count - a.count)
     .slice(0, 6);
 
-  const chartData = generateDailyViewsData(stats, timeRange);
+  const chartData = stats.dailyViews;
 
   return (
     <div className="space-y-8 pb-8">
@@ -172,6 +131,7 @@ export default function AnalyticsDashboard({
         totalViews={totalViews}
         avgSessionDuration={stats.avgSessionDuration}
         completionRate={metrics.completionRate}
+        avgScrollPercentage={metrics.avgScrollPercentage}
       />
 
       <ViewsChart data={chartData} timeRange={timeRange} />

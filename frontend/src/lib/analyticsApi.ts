@@ -9,20 +9,32 @@ export interface Analytics {
   stats: {
     totalViews: number;
     avgSessionDuration: number;
+    avgScrollPercentage: number;
+    completionRate: number;
+    readingTimeDistribution: Array<{
+      range: string;
+      count: number;
+      percentage: number;
+    }>;
+    dailyViews: Array<{
+      day: string;
+      views: number;
+    }>;
     viewsByCountry: Array<{ country: string; count: number }>;
     viewsByOS: Array<{ os: string; count: number }>;
     viewsByBrowser: Array<{ browser: string; count: number }>;
-    viewsOverTime: { [date: string]: number };
   };
 }
 
 export async function trackArticleView(
   articleId: string,
-  sessionDuration?: number
+  sessionDuration?: number,
+  maxScrollPercentage?: number,
 ) {
   try {
     await apiPost(`/articles/${articleId}/track`, {
       sessionDuration,
+      maxScrollPercentage,
     });
   } catch {
     // Silently fail to avoid disrupting user experience
@@ -30,11 +42,12 @@ export async function trackArticleView(
 }
 
 export async function getArticleAnalytics(
-  articleId: string
+  articleId: string,
+  timeRange: "24h" | "7d" | "30d" | "all" = "7d",
 ): Promise<Analytics | null> {
   try {
     const response = await apiGet<Analytics>(
-      `/articles/${articleId}/analytics`
+      `/articles/${articleId}/analytics?timeRange=${timeRange}`,
     );
     return response;
   } catch {

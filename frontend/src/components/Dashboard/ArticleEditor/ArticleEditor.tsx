@@ -1,5 +1,5 @@
 import UpgradeProDialog from "@/components/Account/UpgradeProDialog";
-import AnalyticsDashboard from "@/components/Dashboard/AnalyticsDashboard";
+import AnalyticsDashboard from "@/components/Dashboard/AnalyticsDashboard/AnalyticsDashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
