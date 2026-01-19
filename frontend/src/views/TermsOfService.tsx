@@ -136,7 +136,7 @@ export default function TermsOfService() {
               contact us at:
             </p>
             <div className="mt-4 p-4 bg-muted rounded">
-              <p>support@writtenbyme.com</p>
+              <p>support@writtenbyme.online</p>
             </div>
           </section>
         </div>

@@ -21,7 +21,7 @@ export async function sendMagicLinkEmail(
     }
 
     const response = await resend.emails.send({
-      from: "WrittenByMe <noreply@writtenbyme.com>",
+      from: "WrittenByMe <support@writtenbyme.online>",
       to: email,
       subject: "Your WrittenByMe Sign-In Link",
       html: generateMagicLinkTemplate(magicLink),
@@ -137,7 +137,7 @@ function generateMagicLinkTemplate(magicLink: string): string {
               <strong>Security Note:</strong> This link is unique to you. If you didn't request this email, please ignore it. Never share this link with anyone.
             </div>
 
-            <p>Questions? We're here to help at support@writtenbyme.com</p>
+            <p>Questions? We're here to help at support@writtenbyme.online</p>
           </div>
 
           <div class="footer">

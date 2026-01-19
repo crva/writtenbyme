@@ -158,7 +158,7 @@ export default function Privacy() {
               exercise your data rights, please contact us at:
             </p>
             <div className="mt-4 p-4 bg-muted rounded">
-              <p>support@writtenbyme.com</p>
+              <p>support@writtenbyme.online</p>
             </div>
           </section>
 
