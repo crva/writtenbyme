@@ -21,6 +21,9 @@ RUN npm ci --only=production
 # Copy build output
 COPY --from=build /app/dist ./dist
 
+# Copy drizzle config and migrations
+COPY drizzle.config.ts ./
+
 EXPOSE 3000
 
 # Start backend
