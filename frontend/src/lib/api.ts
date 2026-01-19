@@ -3,15 +3,14 @@
  * Centralized API client for all backend communication
  */
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 /**
  * Fetch wrapper with default configuration
  */
 async function apiCall<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
 

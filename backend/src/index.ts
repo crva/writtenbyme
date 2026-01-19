@@ -32,11 +32,11 @@ app.use(sessionMiddleware);
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use("/api/auth", authRoutes);
-app.use("/api/user", userRoutes);
-app.use("/api/articles", analyticsRoutes);
-app.use("/api/articles", articlesRoutes);
-app.use("/api/payments", paymentsRoutes);
+app.use("/auth", authRoutes);
+app.use("/user", userRoutes);
+app.use("/articles", analyticsRoutes);
+app.use("/articles", articlesRoutes);
+app.use("/payments", paymentsRoutes);
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });

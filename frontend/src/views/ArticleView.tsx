@@ -30,9 +30,11 @@ export default function ArticleView() {
   // Fetch articles when authenticated
   useEffect(() => {
     if (isInitialized && isAuthenticated) {
+      // Avoid refetching when editing a temporary article to prevent it disappearing
+      if (!articleId || articleId.startsWith("temp-")) return;
       fetchArticles();
     }
-  }, [isInitialized, isAuthenticated, fetchArticles]);
+  }, [isInitialized, isAuthenticated, fetchArticles, articleId]);
 
   // Set selected article when component mounts or articleId changes
   useEffect(() => {

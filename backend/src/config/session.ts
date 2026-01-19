@@ -43,9 +43,6 @@ export const sessionMiddleware = session({
     secure: !config.isDev,
     httpOnly: true,
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    // Use "none" in production to allow cross-site requests from the frontend
-    sameSite: config.isDev ? "lax" : "none",
-    ...(process.env.COOKIE_DOMAIN ? { domain: process.env.COOKIE_DOMAIN } : {}),
   },
 });
 

@@ -54,15 +54,32 @@ export default function ArticleEditor({
       const result = await saveChanges(article.id);
       if (result.error) {
         toast.error(result.error);
-      } else {
-        toast.success("Changes saved successfully");
+        return;
+      }
+
+      toast.success("Changes saved successfully");
+
+      // If a temporary article was saved, navigate to the new permanent ID
+      if (result.id && result.id !== article.id) {
+        const newParams = new URLSearchParams(searchParams);
+        if (activeTab) newParams.set("tab", activeTab);
+        navigate(`/dashboard/articles/${result.id}?${newParams.toString()}`, {
+          replace: true,
+        });
       }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to save changes";
       toast.error(errorMessage);
     }
-  }, [article.id, unsavedChanges, saveChanges]);
+  }, [
+    article.id,
+    unsavedChanges,
+    saveChanges,
+    navigate,
+    searchParams,
+    activeTab,
+  ]);
 
   // Used to handle save on CTRL+S
   useEffect(() => {

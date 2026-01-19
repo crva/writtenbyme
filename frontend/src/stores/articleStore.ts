@@ -23,7 +23,14 @@ type ArticleStore = {
   updateArticleContent: (id: string, content: string) => void;
   updateArticleTitle: (id: string, title: string) => void;
   setSelectedArticle: (id: string | null) => void;
-  saveChanges: (id: string) => Promise<{ error?: string; success?: boolean }>;
+  saveChanges: (
+    id: string,
+  ) => Promise<{
+    error?: string;
+    success?: boolean;
+    id?: string;
+    slug?: string;
+  }>;
   discardChanges: (id: string) => void;
   fetchArticles: () => Promise<void>;
   fetchUserArticles: (username: string) => Promise<void>;
@@ -190,7 +197,7 @@ export const useArticle = create<ArticleStore>((set, get) => ({
             newArticles,
           };
         });
-        return { success: true };
+        return { success: true, id: realId, slug: response.article.slug };
       } else {
         // Update existing article
         const response = await updateArticle(String(article.id), {
@@ -220,7 +227,7 @@ export const useArticle = create<ArticleStore>((set, get) => ({
             ),
           ),
         }));
-        return { success: true };
+        return { success: true, id, slug: response.article.slug };
       }
     } catch (error) {
       const errorMessage =
@@ -255,14 +262,21 @@ export const useArticle = create<ArticleStore>((set, get) => ({
       const response = await getMyArticles();
 
       // Handle both array response and wrapped response
-      const articles = Array.isArray(response)
+      const fetched = Array.isArray(response)
         ? response
         : response.articles || [];
 
-      set({
-        articles: articles,
-        newArticles: new Set(), // Clear new articles since we just fetched from API
-        loading: false,
+      // Merge fetched articles with any temporary articles in the store
+      set((currentState) => {
+        const tempArticles = currentState.articles.filter((a) =>
+          currentState.newArticles.has(a.id),
+        );
+
+        return {
+          articles: [...fetched, ...tempArticles],
+          newArticles: new Set(currentState.newArticles),
+          loading: false,
+        };
       });
     } catch {
       toast.error("Failed to fetch articles");
