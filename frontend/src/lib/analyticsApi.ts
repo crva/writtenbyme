@@ -44,13 +44,8 @@ export async function trackArticleView(
 export async function getArticleAnalytics(
   articleId: string,
   timeRange: "24h" | "7d" | "30d" | "all" = "7d",
-): Promise<Analytics | null> {
-  try {
-    const response = await apiGet<Analytics>(
-      `/articles/${articleId}/analytics?timeRange=${timeRange}`,
-    );
-    return response;
-  } catch {
-    return null;
-  }
+): Promise<Analytics> {
+  return apiGet<Analytics>(
+    `/articles/${articleId}/analytics?timeRange=${timeRange}`,
+  );
 }

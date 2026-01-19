@@ -46,10 +46,6 @@ export default function AnalyticsDashboard({
         if (data) {
           setAnalytics(data);
           setError(null);
-        } else {
-          setError(
-            "Failed to fetch analytics. Make sure you own this article.",
-          );
         }
       } catch (err) {
         const errorMsg =

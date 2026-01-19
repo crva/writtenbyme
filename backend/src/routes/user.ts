@@ -1,11 +1,31 @@
 import { Router } from "express";
+import rateLimit from "express-rate-limit";
 import { deleteAccount, updateUsername } from "../controllers/user";
 import { requireAuth } from "../middleware/auth";
 
 const router = Router();
 
+// Rate limit for username updates
+const updateUsernameLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 1, // 1 request per 5 minutes
+  message: "Username can only be changed once every 5 minutes",
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json({
+      error: "Username can only be changed once every 5 minutes",
+    });
+  },
+});
+
 // Protected routes - require authentication
-router.post("/update-username", requireAuth, updateUsername);
+router.post(
+  "/update-username",
+  requireAuth,
+  updateUsernameLimiter,
+  updateUsername,
+);
 router.post("/delete-account", requireAuth, deleteAccount);
 
 export default router;

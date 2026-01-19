@@ -1,12 +1,27 @@
 import logger from "@/lib/logger";
 import { Router, raw } from "express";
+import rateLimit from "express-rate-limit";
 import { createCheckout, handleWebhook } from "../controllers/payments";
 import { requireAuth } from "../middleware/auth";
 
 const router = Router();
 
+// Rate limit for checkout to prevent abuse
+const checkoutLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 2, // 2 checkout attempts per minute
+  message: "Too many checkout requests. Please try again later",
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json({
+      error: "Too many checkout requests. Please try again later",
+    });
+  },
+});
+
 // Create checkout session (requires authentication)
-router.post("/create-checkout", requireAuth, createCheckout);
+router.post("/create-checkout", requireAuth, checkoutLimiter, createCheckout);
 
 // Webhook endpoint with raw body for signature verification
 router.post("/webhook", raw({ type: "application/json" }), async (req, res) => {

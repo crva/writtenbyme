@@ -1,13 +1,43 @@
 import { Router } from "express";
+import rateLimit from "express-rate-limit";
 import * as articlesController from "../controllers/articles";
 import { requireAuth } from "../middleware/auth";
 
 const router = Router();
 
-router.post("/", requireAuth, articlesController.createArticle);
+// Rate limit for article mutations (create, update, delete)
+const articleMutationLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 5, // 5 requests per minute
+  message: "Too many article operations. Please try again later",
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json({
+      error: "Too many article operations. Please try again later",
+    });
+  },
+});
+
+router.post(
+  "/",
+  requireAuth,
+  articleMutationLimiter,
+  articlesController.createArticle,
+);
 router.get("/me", requireAuth, articlesController.getMyArticles);
-router.put("/:id", requireAuth, articlesController.updateArticle);
-router.delete("/:id", requireAuth, articlesController.deleteArticle);
+router.put(
+  "/:id",
+  requireAuth,
+  articleMutationLimiter,
+  articlesController.updateArticle,
+);
+router.delete(
+  "/:id",
+  requireAuth,
+  articleMutationLimiter,
+  articlesController.deleteArticle,
+);
 
 // More specific routes must come before less specific ones
 router.get("/:username/:articleSlug", articlesController.getArticleBySlug);
