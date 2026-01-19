@@ -11,6 +11,8 @@ import Article from "./views/Article.tsx";
 import ArticleView from "./views/ArticleView.tsx";
 import Dashboard from "./views/Dashboard.tsx";
 import MagicLinkVerify from "./views/MagicLinkVerify.tsx";
+import Privacy from "./views/Privacy.tsx";
+import TermsOfService from "./views/TermsOfService.tsx";
 import UserArticles from "./views/UserArticles.tsx";
 
 createRoot(document.getElementById("root")!).render(
@@ -25,6 +27,8 @@ createRoot(document.getElementById("root")!).render(
             path="/dashboard/articles/:articleId"
             element={<ArticleView />}
           />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/privacy" element={<Privacy />} />
           <Route path="/:username" element={<UserArticles />} />
           <Route path="/:username/:articleSlug" element={<Article />} />
         </Routes>

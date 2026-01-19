@@ -5,12 +5,18 @@ export function Footer() {
   return (
     <footer className="border-t bg-muted/30">
       <div className="py-4">
-        <div className="flex justify-center items-center">
-          <Button variant="ghost" className="text-lg font-semibold" asChild>
-            <Link to="/">
-              <span className="text-base font-semibold">writtenbyme</span>
-            </Link>
-          </Button>
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="flex justify-center items-center gap-4 flex-wrap text-xs">
+            <span className="text-muted-foreground">writtenbyme</span>
+            <span className="text-muted-foreground">•</span>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/privacy">Privacy</Link>
+            </Button>
+            <span className="text-muted-foreground">•</span>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/terms">Terms</Link>
+            </Button>
+          </div>
         </div>
       </div>
     </footer>

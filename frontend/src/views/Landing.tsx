@@ -12,7 +12,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useRef } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 export default function Landing() {
   const pricingRef = useRef<HTMLDivElement>(null);
@@ -371,6 +371,19 @@ export default function Landing() {
             >
               Start Writing Now
               <ArrowRight className="ml-2 size-4" />
+            </Button>
+          </div>
+        </section>
+
+        {/* Legal Links */}
+        <section className="px-4 py-8 border-t border-primary/10">
+          <div className="max-w-4xl mx-auto flex justify-center items-center gap-4 flex-wrap text-sm">
+            <Button variant="ghost" asChild>
+              <Link to="/privacy">Privacy Policy</Link>
+            </Button>
+            <span className="text-muted-foreground">•</span>
+            <Button variant="ghost" asChild>
+              <Link to="/terms">Terms of Service</Link>
             </Button>
           </div>
         </section>

@@ -12,6 +12,7 @@ import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
 import { Loader2, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Link } from "react-router";
 
 interface AccountSettingsProps {
   open: boolean;
@@ -63,7 +64,7 @@ export default function AccountSettings({
       }, 1500);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to update username"
+        err instanceof Error ? err.message : "Failed to update username",
       );
     } finally {
       setIsLoading(false);
@@ -157,6 +158,21 @@ export default function AccountSettings({
               >
                 <Trash2 className="h-4 w-4" />
                 Delete Account
+              </Button>
+            </div>
+
+            {/* Legal Links */}
+            <div className="border-t pt-6 flex justify-center items-center gap-4 flex-wrap text-sm">
+              <Button variant="ghost" asChild>
+                <Link to="/privacy" target="_blank">
+                  Privacy Policy
+                </Link>
+              </Button>
+              <span className="text-muted-foreground">•</span>
+              <Button variant="ghost" asChild>
+                <Link to="/terms" target="_blank">
+                  Terms of Service
+                </Link>
               </Button>
             </div>
           </div>
