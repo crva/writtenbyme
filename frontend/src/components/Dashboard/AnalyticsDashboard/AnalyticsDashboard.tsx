@@ -15,6 +15,7 @@ import {
 
 interface AnalyticsDashboardProps {
   articleId: string;
+  title: string;
 }
 
 // Simulated computed metrics (would come from backend in production)
@@ -28,6 +29,7 @@ const computeMetrics = (stats: Analytics["stats"]) => {
 
 export default function AnalyticsDashboard({
   articleId,
+  title,
 }: AnalyticsDashboardProps) {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
@@ -62,9 +64,7 @@ export default function AnalyticsDashboard({
   }, [articleId, timeRange]);
 
   if (loading) {
-    // Use previous article title if available, otherwise use placeholder
-    const articleTitle = analytics?.article.title || "Article Analytics";
-    return <AnalyticsSkeleton title={articleTitle} timeRange={timeRange} />;
+    return <AnalyticsSkeleton title={title} timeRange={timeRange} />;
   }
 
   if (error) {

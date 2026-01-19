@@ -98,7 +98,10 @@ export default function ArticleEditor({ article }: Props) {
         {user?.isPaid && (
           <TabsContent value="analytics" className="flex-1 overflow-auto">
             <div className="p-4">
-              <AnalyticsDashboard articleId={article.id} />
+              <AnalyticsDashboard
+                articleId={article.id}
+                title={article.title}
+              />
             </div>
           </TabsContent>
         )}
