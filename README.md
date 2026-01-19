@@ -4,6 +4,21 @@
 
 Simple web app to create, edit, and share articles with a modern UI and reliable backend.
 
+## ❓ Why ?
+
+I made this project to see where I can go alone, I wanted to make a SaaS from scratch in less than 2 weeks.
+
+I learned several things:
+
+- How payment processing works
+  - [polar.sh](https://polar.sh/)
+- Auth -> Sessions (I was used to JWTs before)
+- Mailing
+  - [Resend](https://resend.com/)
+  - Magic links
+- DNS ([namecheap](https://www.namecheap.com/))
+  - Buy & configure a domain name
+
 ---
 
 ## 🚀 Quick Start
@@ -17,6 +32,7 @@ Simple web app to create, edit, and share articles with a modern UI and reliable
 ### 1️⃣ Start Database
 
 ```bash
+cd backend
 docker-compose up -d
 ```
 
@@ -29,8 +45,6 @@ npm run db:push
 npm run dev
 ```
 
-Backend: http://localhost:3001
-
 ### 3️⃣ Setup Frontend
 
 ```bash
@@ -39,16 +53,7 @@ npm install
 npm run dev
 ```
 
-Frontend: http://localhost:5173
-
-### 4️⃣ Test It Out
-
-1. Open http://localhost:5173
-2. Click "Sign in / Register"
-3. Create an account
-4. Start writing! ✍️
-
-### 5️⃣ Setup Payments (Optional - for testing Polar.sh)
+### 4️⃣ Setup Payments (Optional - for testing Polar.sh)
 
 To test payments locally, you need to expose your local backend to the internet so Polar.sh webhooks can reach it:
 
@@ -88,49 +93,5 @@ POLAR_WEBHOOK_URL=https://abc123def456.ngrok.io/api/payments/webhook
 4. Test the webhook connection
 
 Now your local backend can receive webhooks from Polar during payment testing!
-
----
-
-## 📊 Analytics
-
-Articles automatically track reader statistics including:
-
-- **Page Views**: Total number of views per article
-- **Reading Time**: Average time spent reading each article
-- **Geographic Data**: Country information from reader IP addresses
-- **Device Info**: Operating system and browser breakdown
-
-Authors can view these analytics in the article editor dashboard:
-
-1. Open an article in edit mode
-2. Click the "Analytics" tab
-3. See detailed statistics about your article's performance
-
-### How Analytics Work
-
-- **View Tracking**: When someone reads your article, a view is recorded with:
-
-  - IP address (converted to country)
-  - Browser and OS information
-  - Session duration
-  - Timestamp
-
-- **Geo-IP Lookup**: Uses geoip-lite library to convert IP addresses to country codes
-- **User Agent Parsing**: Uses ua-parser-js to extract browser and OS information
-- **Privacy**: IP addresses are NOT stored but only used for geolocation
-
----
-
-## 🏗️ Architecture
-
-```
-Frontend (React + Zustand)
-    ↓
-API Client (Generic fetch wrapper)
-    ↓
-Backend (Express + PassportJS)
-    ↓
-Database (PostgreSQL)
-```
 
 ---
