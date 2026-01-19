@@ -14,9 +14,9 @@ FROM node:24-slim AS prod
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Only install production deps
+# Install all deps (including dev deps needed for drizzle-kit)
 COPY package.json package-lock.json ./
-RUN npm ci --only=production
+RUN npm ci
 
 # Copy build output
 COPY --from=build /app/dist ./dist
