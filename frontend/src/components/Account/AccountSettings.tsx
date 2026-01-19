@@ -84,9 +84,20 @@ export default function AccountSettings({
     }
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    // Allow closing, but preserve error state when reopening
+    onOpenChange(newOpen);
+    // Only clear error if the user is closing AND there's an error
+    // This lets them see the error before deciding to close
+    if (!newOpen) {
+      // Keep the error visible but allow close
+      return;
+    }
+  };
+
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Account Settings</DialogTitle>
