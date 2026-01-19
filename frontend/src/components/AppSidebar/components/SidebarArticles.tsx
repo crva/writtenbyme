@@ -10,6 +10,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePaidUser } from "@/hooks/usePaidUser";
 import { useArticle } from "@/stores/articleStore";
+import { useUser } from "@/stores/userStore";
 import { Newspaper, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
@@ -25,6 +26,7 @@ export default function SidebarArticles() {
     selectedArticleId,
     setSelectedArticle,
   } = useArticle();
+  const { user } = useUser();
   const isPaid = usePaidUser();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -71,6 +73,7 @@ export default function SidebarArticles() {
                 asChild
                 className="text-muted-foreground"
                 onClick={() => handleNewArticleClick()}
+                disabled={!user}
               >
                 <div className={`cursor-pointer`} onClick={() => {}}>
                   <PlusCircle />
