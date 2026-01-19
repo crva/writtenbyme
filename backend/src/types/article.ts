@@ -1,4 +1,4 @@
-import { articlesTable } from "../db/schema";
+import { articlesTable } from "../db/schema.js";
 
 // Infer Article type from Drizzle schema
 type Article = typeof articlesTable.$inferSelect;

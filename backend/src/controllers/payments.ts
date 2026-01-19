@@ -2,11 +2,11 @@ import { Polar } from "@polar-sh/sdk";
 import crypto from "crypto";
 import { eq } from "drizzle-orm";
 import { Response } from "express";
-import { config } from "../config/config";
-import { usersTable } from "../db/schema";
-import { db } from "../lib/db";
-import { logger } from "../lib/logger";
-import { AuthRequest } from "../types/auth";
+import { config } from "../config/config.js";
+import { usersTable } from "../db/schema.js";
+import { db } from "../lib/db.js";
+import { logger } from "../lib/logger.js";
+import { AuthRequest } from "../types/auth.js";
 
 // Use sandbox environment for testing
 const polar = new Polar({
@@ -32,7 +32,7 @@ export const createCheckout = async (req: AuthRequest, res: Response) => {
 
     logger.info(
       { userId: req.user.id, checkoutId: checkout.id, checkout },
-      "Checkout created"
+      "Checkout created",
     );
 
     // The checkout URL should be in the response
@@ -54,7 +54,7 @@ export const handleWebhook = async (
   event: any,
   rawBody: string,
   headers: any,
-  res: Response
+  res: Response,
 ) => {
   try {
     const webhookSignature = headers["webhook-signature"] as string;
@@ -64,7 +64,7 @@ export const handleWebhook = async (
     if (!webhookSignature || !webhookId || !webhookTimestamp) {
       logger.warn(
         { webhookSignature, webhookId, webhookTimestamp },
-        "Missing webhook headers for signature verification"
+        "Missing webhook headers for signature verification",
       );
       return res.status(401).json({ error: "Missing webhook headers" });
     }
@@ -88,13 +88,13 @@ export const handleWebhook = async (
         expectedSignature,
         match: signature === expectedSignature,
       },
-      "Webhook signature verification"
+      "Webhook signature verification",
     );
 
     if (signature !== expectedSignature) {
       logger.warn(
         { signature, expectedSignature },
-        "Invalid webhook signature"
+        "Invalid webhook signature",
       );
       return res.status(401).json({ error: "Unauthorized" });
     }
@@ -121,7 +121,7 @@ export const handleWebhook = async (
 
       logger.info(
         { userId: metadata.userId, subscriptionId: event.data.id },
-        "User subscription activated - upgraded to Pro"
+        "User subscription activated - upgraded to Pro",
       );
     }
 
@@ -145,7 +145,7 @@ export const handleWebhook = async (
 
       logger.info(
         { userId: metadata.userId, subscriptionId: event.data.id },
-        "User subscription canceled - revoked Pro access"
+        "User subscription canceled - revoked Pro access",
       );
     }
 

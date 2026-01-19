@@ -1,8 +1,8 @@
-import logger from "@/lib/logger";
 import { Router, raw } from "express";
 import rateLimit from "express-rate-limit";
-import { createCheckout, handleWebhook } from "../controllers/payments";
-import { requireAuth } from "../middleware/auth";
+import { createCheckout, handleWebhook } from "../controllers/payments.js";
+import { logger } from "../lib/logger.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const router = Router();
 

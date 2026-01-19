@@ -2,12 +2,12 @@ import { randomBytes, randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
 import { Response } from "express";
 import { z } from "zod";
-import { magicLinksTable, usersTable } from "../db/schema";
-import { db } from "../lib/db";
-import { sendMagicLinkEmail } from "../lib/email";
-import { logger } from "../lib/logger";
-import { AuthRequest } from "../types/auth";
-import { AuthPayload } from "../types/user";
+import { magicLinksTable, usersTable } from "../db/schema.js";
+import { db } from "../lib/db.js";
+import { sendMagicLinkEmail } from "../lib/email.js";
+import { logger } from "../lib/logger.js";
+import { AuthRequest } from "../types/auth.js";
+import { AuthPayload } from "../types/user.js";
 
 export const logout = (req: AuthRequest, res: Response) => {
   try {
@@ -104,7 +104,7 @@ export const sendMagicLink = async (req: AuthRequest, res: Response) => {
     if (error instanceof z.ZodError) {
       logger.warn(
         { error: error.issues },
-        "Validation error in magic link request"
+        "Validation error in magic link request",
       );
       return res.status(400).json({ error: error.issues[0].message });
     }
@@ -119,7 +119,7 @@ export const verifyMagicLink = async (req: AuthRequest, res: Response) => {
 
     logger.info(
       { token: token.substring(0, 10) + "..." },
-      "Magic link verification"
+      "Magic link verification",
     );
 
     // Find the magic link
@@ -133,7 +133,7 @@ export const verifyMagicLink = async (req: AuthRequest, res: Response) => {
     if (!link) {
       logger.warn(
         { token: token.substring(0, 10) + "..." },
-        "Magic link not found"
+        "Magic link not found",
       );
       return res.status(401).json({ error: "Invalid magic link" });
     }
@@ -181,7 +181,7 @@ export const verifyMagicLink = async (req: AuthRequest, res: Response) => {
       user = insertResult[0];
       logger.info(
         { userId: user.id, email: user.email },
-        "New user created via magic link"
+        "New user created via magic link",
       );
     }
 
@@ -203,7 +203,7 @@ export const verifyMagicLink = async (req: AuthRequest, res: Response) => {
 
       logger.info(
         { userId: user.id, email: user.email },
-        "User logged in via magic link"
+        "User logged in via magic link",
       );
 
       return res.json({
@@ -220,7 +220,7 @@ export const verifyMagicLink = async (req: AuthRequest, res: Response) => {
     if (error instanceof z.ZodError) {
       logger.warn(
         { error: error.issues },
-        "Validation error in magic link verification"
+        "Validation error in magic link verification",
       );
       return res.status(400).json({ error: error.issues[0].message });
     }

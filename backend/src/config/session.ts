@@ -1,8 +1,8 @@
 import pgSession from "connect-pg-simple";
 import session from "express-session";
 import { Pool } from "pg";
-import { logger } from "../lib/logger";
-import { config } from "./config";
+import { logger } from "../lib/logger.js";
+import { config } from "./config.js";
 
 logger.info("Creating PostgreSQL session pool...");
 

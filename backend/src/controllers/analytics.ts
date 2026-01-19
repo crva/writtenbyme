@@ -1,10 +1,10 @@
 import { desc, eq } from "drizzle-orm";
 import { Request, Response } from "express";
-import { articlesTable, articleViewsTable, usersTable } from "../db/schema";
-import { db } from "../lib/db";
-import { logger } from "../lib/logger";
-import { getCountryFromIP } from "../services/geoip";
-import { parseUserAgent } from "../services/userAgent";
+import { articlesTable, articleViewsTable, usersTable } from "../db/schema.js";
+import { db } from "../lib/db.js";
+import { logger } from "../lib/logger.js";
+import { getCountryFromIP } from "../services/geoip.js";
+import { parseUserAgent } from "../services/userAgent.js";
 
 export async function trackArticleView(req: Request, res: Response) {
   try {

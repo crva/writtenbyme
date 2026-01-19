@@ -1,5 +1,5 @@
-import { logger } from "@/lib/logger";
 import geoip from "geoip-lite";
+import { logger } from "../lib/logger.js";
 
 export function getCountryFromIP(ipAddress: string): string | null {
   try {

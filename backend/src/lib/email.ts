@@ -1,12 +1,12 @@
 import { Resend } from "resend";
-import { config } from "../config/config";
-import { logger } from "./logger";
+import { config } from "../config/config.js";
+import { logger } from "./logger.js";
 
 const resend = new Resend(config.resend.apiKey);
 
 export async function sendMagicLinkEmail(
   email: string,
-  magicLink: string
+  magicLink: string,
 ): Promise<void> {
   try {
     if (!config.resend.apiKey) {
@@ -30,14 +30,14 @@ export async function sendMagicLinkEmail(
     if (response.error) {
       logger.error(
         { error: response.error, email },
-        "Failed to send magic link email"
+        "Failed to send magic link email",
       );
       throw new Error(`Failed to send email: ${response.error.message}`);
     }
 
     logger.info(
       { email, messageId: response.data?.id },
-      "Magic link email sent"
+      "Magic link email sent",
     );
   } catch (error) {
     logger.error({ error, email }, "Error sending magic link email");

@@ -1,3 +1,3 @@
-export { config } from "./config";
-export { default as passport } from "./passport";
-export { sessionMiddleware, sessionStore } from "./session";
+export { config } from "./config.js";
+export { default as passport } from "./passport.js";
+export { sessionMiddleware, sessionStore } from "./session.js";

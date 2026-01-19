@@ -1,7 +1,10 @@
-import { getArticleAnalytics, trackArticleView } from "@/controllers/analytics";
-import { requireAuth } from "@/middleware/auth";
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
+import {
+  getArticleAnalytics,
+  trackArticleView,
+} from "../controllers/analytics.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const router = Router();
 

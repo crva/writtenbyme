@@ -1,6 +1,6 @@
 // Auth types
-export type { AuthRequest, AuthResponse } from "./auth";
-export type { AuthPayload, User } from "./user";
+export type { AuthRequest, AuthResponse } from "./auth.js";
+export type { AuthPayload, User } from "./user.js";
 
 // Article types
 export type {

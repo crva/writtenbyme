@@ -6,10 +6,10 @@ import {
   articleViewsTable,
   magicLinksTable,
   usersTable,
-} from "../db/schema";
-import { db } from "../lib/db";
-import { logger } from "../lib/logger";
-import { AuthRequest } from "../types/auth";
+} from "../db/schema.js";
+import { db } from "../lib/db.js";
+import { logger } from "../lib/logger.js";
+import { AuthRequest } from "../types/auth.js";
 
 const updateUsernameSchema = z.object({
   username: z.string().min(3).max(30),
@@ -25,7 +25,7 @@ export const updateUsername = async (req: AuthRequest, res: Response) => {
 
     logger.info(
       { userId: req.user.id, newUsername: data.username },
-      "Username update attempt"
+      "Username update attempt",
     );
 
     // Check if new username already exists
@@ -34,16 +34,16 @@ export const updateUsername = async (req: AuthRequest, res: Response) => {
       .from(usersTable)
       .where(
         and(
-          eq(usersTable.username, data.username)
+          eq(usersTable.username, data.username),
           // Exclude the current user from the check
           //eq(usersTable.id, req.user.id) is the NOT check below
-        )
+        ),
       );
 
     if (existingUser.length > 0 && existingUser[0].id !== req.user.id) {
       logger.warn(
         { username: data.username },
-        "Username update failed: Username already taken"
+        "Username update failed: Username already taken",
       );
       return res.status(400).json({ error: "Username already taken" });
     }
@@ -76,7 +76,7 @@ export const updateUsername = async (req: AuthRequest, res: Response) => {
     if (error instanceof z.ZodError) {
       logger.warn(
         { error: error.issues },
-        "Validation error in username update"
+        "Validation error in username update",
       );
       return res.status(400).json({ error: error.issues[0].message });
     }
@@ -129,7 +129,7 @@ export const deleteAccount = async (req: AuthRequest, res: Response) => {
       if (err) {
         logger.error(
           { error: err },
-          "Error logging out during account deletion"
+          "Error logging out during account deletion",
         );
       }
     });

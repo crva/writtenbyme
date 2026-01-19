@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 import passport from "passport";
-import { usersTable } from "../db/schema";
-import { db } from "../lib/db";
-import type { AuthPayload } from "../types/user";
+import { usersTable } from "../db/schema.js";
+import { db } from "../lib/db.js";
+import type { AuthPayload } from "../types/user.js";
 
 passport.serializeUser((user, done) => {
   done(null, user.id);

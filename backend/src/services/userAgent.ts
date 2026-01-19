@@ -1,5 +1,5 @@
-import { logger } from "@/lib/logger";
 import { UAParser } from "ua-parser-js";
+import { logger } from "../lib/logger.js";
 
 export interface ParsedUserAgent {
   os: string | null;

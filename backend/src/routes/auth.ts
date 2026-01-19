@@ -5,8 +5,8 @@ import {
   logout,
   sendMagicLink,
   verifyMagicLink,
-} from "../controllers/auth";
-import { requireAuth } from "../middleware/auth";
+} from "../controllers/auth.js";
+import { requireAuth } from "../middleware/auth.js";
 
 const router = Router();
 

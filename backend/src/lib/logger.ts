@@ -1,5 +1,5 @@
 import pino from "pino";
-import { config } from "../config";
+import { config } from "../config/index.js";
 
 const isDev = config.nodeEnv === "development";
 
@@ -32,7 +32,7 @@ export const logger = pino(
           messageFormat: "{msg}",
         },
       })
-    : undefined
+    : undefined,
 );
 
 export default logger;
