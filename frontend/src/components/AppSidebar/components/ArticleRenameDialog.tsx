@@ -39,7 +39,7 @@ export default function ArticleRenameDialog({
     const titleExists = articles.some(
       (a) =>
         a.id !== articleId &&
-        a.title.toLowerCase() === newTitle.trim().toLowerCase()
+        a.title.toLowerCase() === newTitle.trim().toLowerCase(),
     );
 
     if (titleExists) {
@@ -66,7 +66,7 @@ export default function ArticleRenameDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent>
+      <DialogContent onClick={(e) => e.stopPropagation()}>
         <DialogHeader>
           <DialogTitle>Rename Article</DialogTitle>
           <DialogDescription>
@@ -89,6 +89,13 @@ export default function ArticleRenameDialog({
                 handleRename();
               }
             }}
+            autoFocus
+            onFocus={(e) =>
+              e.currentTarget.setSelectionRange(
+                e.currentTarget.value.length,
+                e.currentTarget.value.length,
+              )
+            }
           />
         </div>
         <DialogFooter>

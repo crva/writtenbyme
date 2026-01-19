@@ -76,6 +76,10 @@ export default function ArticleSettings({ articleId }: Props) {
     }
   };
 
+  const stopPropagation = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <div className="space-y-2">
       {saveError && (
@@ -94,7 +98,12 @@ export default function ArticleSettings({ articleId }: Props) {
           {hasUnsavedChanges && (
             <>
               <DropdownMenuGroup>
-                <DropdownMenuItem onClick={handleSave}>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    stopPropagation(e);
+                    handleSave();
+                  }}
+                >
                   <Check className="size-4 text-green-500" />
                   Save changes
                   <KbdGroup>
@@ -102,7 +111,12 @@ export default function ArticleSettings({ articleId }: Props) {
                     <Kbd>S</Kbd>
                   </KbdGroup>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleDiscard}>
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    stopPropagation(e);
+                    handleDiscard();
+                  }}
+                >
                   <X className="size-4 text-destructive" />
                   Discard changes
                 </DropdownMenuItem>
@@ -111,7 +125,12 @@ export default function ArticleSettings({ articleId }: Props) {
             </>
           )}
           {article?.slug ? (
-            <DropdownMenuItem onClick={handleView}>
+            <DropdownMenuItem
+              onClick={(e) => {
+                stopPropagation(e);
+                handleView();
+              }}
+            >
               <ExternalLink className="size-4" />
               View
             </DropdownMenuItem>
@@ -128,11 +147,22 @@ export default function ArticleSettings({ articleId }: Props) {
               </TooltipContent>
             </Tooltip>
           )}
-          <DropdownMenuItem onClick={() => setRenameDialogOpen(true)}>
+          <DropdownMenuItem
+            onClick={(e) => {
+              stopPropagation(e);
+              setRenameDialogOpen(true);
+            }}
+          >
             <Pen className="size-4" />
             Rename
           </DropdownMenuItem>
-          <DropdownMenuItem className="text-destructive" onClick={handleDelete}>
+          <DropdownMenuItem
+            className="text-destructive"
+            onClick={(e) => {
+              stopPropagation(e);
+              handleDelete();
+            }}
+          >
             <Trash2 className="size-4 text-destructive" />
             Delete
           </DropdownMenuItem>
