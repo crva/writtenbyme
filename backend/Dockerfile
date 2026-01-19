@@ -17,7 +17,6 @@ ENV NODE_ENV=production
 # Only install production deps
 COPY package.json package-lock.json ./
 RUN npm ci --only=production
-RUN npm install drizzle-kit
 
 # Copy build output
 COPY --from=build /app/dist ./dist
@@ -25,4 +24,4 @@ COPY --from=build /app/dist ./dist
 EXPOSE 3000
 
 # Start backend
-CMD ["sh", "-c", "npm run db:push && node dist/index.js"]
+CMD ["sh", "-c", "npx drizzle-kit generate && npx drizzle-kit push && node dist/index.js"]

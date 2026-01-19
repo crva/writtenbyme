@@ -3,6 +3,7 @@ import {
   boolean,
   index,
   integer,
+  json,
   pgTable,
   text,
   timestamp,
@@ -69,6 +70,16 @@ export const articleViewsTable = pgTable(
     index("ArticleView_articleId_idx").on(table.articleId),
     index("ArticleView_createdAt_idx").on(table.createdAt),
   ],
+);
+
+export const sessionsTable = pgTable(
+  "Session",
+  {
+    sid: text("sid").primaryKey(),
+    sess: json("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("Session_expire_idx").on(table.expire)],
 );
 
 // Relations
