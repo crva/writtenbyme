@@ -1,5 +1,6 @@
 export { AnalyticsFooter } from "./AnalyticsFooter";
 export { AnalyticsHeader } from "./AnalyticsHeader";
+export { AnalyticsSkeleton } from "./AnalyticsSkeleton";
 export { BarChartRow } from "./BarChartRow";
 export { DeviceBreakdown } from "./DeviceBreakdown";
 export { DistributionBar } from "./DistributionBar";

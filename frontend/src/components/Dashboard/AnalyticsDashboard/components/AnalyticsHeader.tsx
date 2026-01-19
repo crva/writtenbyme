@@ -12,7 +12,7 @@ export function AnalyticsHeader({
   onTimeRangeChange,
 }: AnalyticsHeaderProps) {
   return (
-    <div className="border-b border-slate-200 dark:border-slate-800 pb-8">
+    <div className="border-b border-slate-200 dark:border-slate-800">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-light tracking-tight mb-2">{title}</h1>
@@ -26,7 +26,7 @@ export function AnalyticsHeader({
             onTimeRangeChange(value as "24h" | "7d" | "30d" | "all")
           }
         >
-          <TabsList className="bg-slate-100 dark:bg-slate-800 p-1">
+          <TabsList className="p-1">
             <TabsTrigger value="24h" className="text-xs">
               24h
             </TabsTrigger>
