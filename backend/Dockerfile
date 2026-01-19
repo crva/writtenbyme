@@ -17,6 +17,7 @@ ENV NODE_ENV=production
 # Only install production deps
 COPY package.json package-lock.json ./
 RUN npm ci --only=production
+RUN npm install --no-save drizzle-kit
 
 # Copy build output
 COPY --from=build /app/dist ./dist
