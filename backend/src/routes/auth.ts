@@ -1,5 +1,5 @@
 import { Router } from "express";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import {
   getSession,
   logout,
@@ -16,7 +16,8 @@ const magicLinkLimiter = rateLimit({
   message: "Too many requests. Please try again in a minute",
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.ip || req.socket.remoteAddress || "",
+  keyGenerator: (req) =>
+    ipKeyGenerator(req.ip || req.socket.remoteAddress || ""),
   handler: (req, res) => {
     res.status(429).json({
       error: "Too many requests. Please try again in a minute",
@@ -31,7 +32,8 @@ const verifyMagicLinkLimiter = rateLimit({
   message: "Too many verification attempts. Please try again in a minute",
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.ip || req.socket.remoteAddress || "",
+  keyGenerator: (req) =>
+    ipKeyGenerator(req.ip || req.socket.remoteAddress || ""),
   handler: (req, res) => {
     res.status(429).json({
       error: "Too many verification attempts. Please try again in a minute",

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { deleteAccount, updateUsername } from "../controllers/user.js";
 import { requireAuth } from "../middleware/auth.js";
 
@@ -12,7 +12,8 @@ const updateUsernameLimiter = rateLimit({
   message: "Username can only be changed once every 5 minutes",
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.ip || req.socket.remoteAddress || "",
+  keyGenerator: (req) =>
+    ipKeyGenerator(req.ip || req.socket.remoteAddress || ""),
   handler: (req, res) => {
     res.status(429).json({
       error: "Username can only be changed once every 5 minutes",

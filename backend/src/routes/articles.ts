@@ -1,5 +1,5 @@
 import { Router } from "express";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import * as articlesController from "../controllers/articles.js";
 import { requireAuth } from "../middleware/auth.js";
 
@@ -12,7 +12,8 @@ const articleMutationLimiter = rateLimit({
   message: "Too many article operations. Please try again later",
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.ip || req.socket.remoteAddress || "",
+  keyGenerator: (req) =>
+    ipKeyGenerator(req.ip || req.socket.remoteAddress || ""),
   handler: (req, res) => {
     res.status(429).json({
       error: "Too many article operations. Please try again later",

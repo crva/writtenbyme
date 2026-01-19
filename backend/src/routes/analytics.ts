@@ -1,5 +1,5 @@
 import { Router } from "express";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import {
   getArticleAnalytics,
   trackArticleView,
@@ -15,7 +15,8 @@ const analyticsLimiter = rateLimit({
   message: "Too many requests, please try again later",
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.ip || req.socket.remoteAddress || "",
+  keyGenerator: (req) =>
+    ipKeyGenerator(req.ip || req.socket.remoteAddress || ""),
   handler: (req, res) => {
     res.status(429).json({
       error: "Too many requests, please try again later",

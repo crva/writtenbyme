@@ -1,5 +1,5 @@
 import { Router, raw } from "express";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { createCheckout, handleWebhook } from "../controllers/payments.js";
 import { logger } from "../lib/logger.js";
 import { requireAuth } from "../middleware/auth.js";
@@ -13,7 +13,8 @@ const checkoutLimiter = rateLimit({
   message: "Too many checkout requests. Please try again later",
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.ip || req.socket.remoteAddress || "",
+  keyGenerator: (req) =>
+    ipKeyGenerator(req.ip || req.socket.remoteAddress || ""),
   handler: (req, res) => {
     res.status(429).json({
       error: "Too many checkout requests. Please try again later",
