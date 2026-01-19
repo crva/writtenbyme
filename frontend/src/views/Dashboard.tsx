@@ -1,6 +1,5 @@
 import MagicLinkDialog from "@/components/Account/MagicLinkDialog";
 import AppSidebar from "@/components/AppSidebar/AppSidebar";
-import ArticleEditor from "@/components/Dashboard/ArticleEditor/ArticleEditor";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,7 +15,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
 
 export default function Dashboard() {
-  const { articles, selectedArticleId, fetchArticles } = useArticle();
+  const { fetchArticles } = useArticle();
   const { checkAuth, isAuthenticated, user } = useUser();
   const [isInitialized, setIsInitialized] = useState(false);
   const [searchParams] = useSearchParams();
@@ -46,11 +45,6 @@ export default function Dashboard() {
       fetchArticles();
     }
   }, [isInitialized, isAuthenticated, fetchArticles]);
-
-  const selectedArticle =
-    selectedArticleId !== null
-      ? articles.find((a) => a.id === selectedArticleId)
-      : null;
 
   const handleRefreshPage = () => {
     window.location.reload();
@@ -91,9 +85,13 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
       <AppSidebar />
-      <main className="h-screen w-screen p-2.5">
-        {selectedArticle && <ArticleEditor article={selectedArticle} />}
-      </main>
+      {isInitialized && isAuthenticated && (
+        <main className="h-screen w-screen p-2.5 flex items-center justify-center">
+          <p className="text-slate-600 dark:text-slate-400">
+            Select or create an article to get started
+          </p>
+        </main>
+      )}
     </SidebarProvider>
   );
 }

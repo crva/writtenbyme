@@ -8,6 +8,7 @@ import App from "./App.tsx";
 import { ThemeProvider } from "./components/ThemeProvider.tsx";
 import "./index.css";
 import Article from "./views/Article.tsx";
+import ArticleView from "./views/ArticleView.tsx";
 import Dashboard from "./views/Dashboard.tsx";
 import MagicLinkVerify from "./views/MagicLinkVerify.tsx";
 import UserArticles from "./views/UserArticles.tsx";
@@ -20,11 +21,15 @@ createRoot(document.getElementById("root")!).render(
           <Route path="/" element={<App />} />
           <Route path="/auth/magic-link" element={<MagicLinkVerify />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route
+            path="/dashboard/articles/:articleId"
+            element={<ArticleView />}
+          />
           <Route path="/:username" element={<UserArticles />} />
           <Route path="/:username/:articleSlug" element={<Article />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
     <Toaster />
-  </StrictMode>
+  </StrictMode>,
 );

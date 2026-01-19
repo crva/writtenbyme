@@ -89,10 +89,10 @@ export const useArticle = create<ArticleStore>((set, get) => ({
         selectedArticleId:
           state.selectedArticleId === id ? null : state.selectedArticleId,
         unsavedChanges: Object.fromEntries(
-          Object.entries(state.unsavedChanges).filter(([key]) => key !== id)
+          Object.entries(state.unsavedChanges).filter(([key]) => key !== id),
         ),
         originalContent: Object.fromEntries(
-          Object.entries(state.originalContent).filter(([key]) => key !== id)
+          Object.entries(state.originalContent).filter(([key]) => key !== id),
         ),
         newArticles,
       };
@@ -105,7 +105,7 @@ export const useArticle = create<ArticleStore>((set, get) => ({
 
       return {
         articles: state.articles.map((article) =>
-          article.id === id ? { ...article, content } : article
+          article.id === id ? { ...article, content } : article,
         ),
         unsavedChanges: {
           ...state.unsavedChanges,
@@ -123,7 +123,7 @@ export const useArticle = create<ArticleStore>((set, get) => ({
   updateArticleTitle: (id: string | number, title: string) =>
     set((state) => ({
       articles: state.articles.map((article) =>
-        article.id === id ? { ...article, title } : article
+        article.id === id ? { ...article, title } : article,
       ),
     })),
 
@@ -164,19 +164,19 @@ export const useArticle = create<ArticleStore>((set, get) => ({
                   slug: response.article.slug,
                   content: response.article.content,
                 }
-              : a
+              : a,
           );
 
           const updatedUnsavedChanges = Object.fromEntries(
             Object.entries(currentState.unsavedChanges).filter(
-              ([key]) => key !== id
-            )
+              ([key]) => key !== id,
+            ),
           );
 
           const updatedOriginalContent = Object.fromEntries(
             Object.entries(currentState.originalContent).filter(
-              ([key]) => key !== id
-            )
+              ([key]) => key !== id,
+            ),
           );
 
           return {
@@ -207,17 +207,17 @@ export const useArticle = create<ArticleStore>((set, get) => ({
                   slug: response.article.slug,
                   content: response.article.content,
                 }
-              : a
+              : a,
           ),
           unsavedChanges: Object.fromEntries(
             Object.entries(currentState.unsavedChanges).filter(
-              ([key]) => key !== id
-            )
+              ([key]) => key !== id,
+            ),
           ),
           originalContent: Object.fromEntries(
             Object.entries(currentState.originalContent).filter(
-              ([key]) => key !== id
-            )
+              ([key]) => key !== id,
+            ),
           ),
         }));
         return { success: true };
@@ -242,7 +242,7 @@ export const useArticle = create<ArticleStore>((set, get) => ({
         articles: state.articles.map((article) =>
           article.id === id && originalContent !== undefined
             ? { ...article, content: originalContent }
-            : article
+            : article,
         ),
         unsavedChanges: newChanges,
         originalContent: newOriginalContent,
@@ -251,6 +251,7 @@ export const useArticle = create<ArticleStore>((set, get) => ({
 
   fetchArticles: async () => {
     try {
+      set({ loading: true });
       const response = await getMyArticles();
 
       // Handle both array response and wrapped response
@@ -261,9 +262,11 @@ export const useArticle = create<ArticleStore>((set, get) => ({
       set({
         articles: articles,
         newArticles: new Set(), // Clear new articles since we just fetched from API
+        loading: false,
       });
     } catch {
       toast.error("Failed to fetch articles");
+      set({ loading: false });
     }
   },
 

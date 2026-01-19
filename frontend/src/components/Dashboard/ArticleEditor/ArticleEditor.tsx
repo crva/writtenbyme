@@ -6,18 +6,25 @@ import { useUser } from "@/stores/userStore";
 import type { Article } from "@/types/article";
 import MDEditor from "@uiw/react-md-editor";
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import "./ArticleEditor.css";
 
 type Props = {
   article: Article;
+  initialTab?: "editor" | "analytics";
 };
 
-export default function ArticleEditor({ article }: Props) {
+export default function ArticleEditor({
+  article,
+  initialTab = "editor",
+}: Props) {
   const { updateArticleContent, saveChanges, unsavedChanges } = useArticle();
   const user = useUser((state) => state.user);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
-  const [activeTab, setActiveTab] = useState("editor");
+  const [activeTab, setActiveTab] = useState(initialTab);
 
   const handleContentChange = (content: string) => {
     updateArticleContent(article.id, content);
@@ -29,7 +36,11 @@ export default function ArticleEditor({ article }: Props) {
       setShowUpgradeDialog(true);
       return;
     }
-    setActiveTab(tabValue);
+    setActiveTab(tabValue as "editor" | "analytics");
+    // Update URL query params
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set("tab", tabValue);
+    navigate(`?${newParams.toString()}`, { replace: true });
   };
 
   const handleSave = useCallback(async () => {
@@ -69,7 +80,7 @@ export default function ArticleEditor({ article }: Props) {
   }, [handleSave]);
 
   return (
-    <>
+    <main className="h-screen w-screen p-2.5">
       <Tabs
         value={activeTab}
         onValueChange={handleTabChange}
@@ -111,6 +122,6 @@ export default function ArticleEditor({ article }: Props) {
         open={showUpgradeDialog}
         onOpenChange={setShowUpgradeDialog}
       />
-    </>
+    </main>
   );
 }
