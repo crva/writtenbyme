@@ -19,6 +19,8 @@ RUN npm run build
 # ---------- Frontend build ----------
 FROM node:24-slim AS frontend-build
 WORKDIR /app/frontend
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
 COPY frontend/ .
