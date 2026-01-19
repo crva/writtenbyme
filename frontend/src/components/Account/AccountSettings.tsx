@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
 import { Loader2, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -28,6 +29,7 @@ export default function AccountSettings({
   const [success, setSuccess] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const resetStore = useArticle((state) => state.resetStore);
 
   useEffect(() => {
     if (user) {
@@ -76,6 +78,7 @@ export default function AccountSettings({
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete account");
     } finally {
+      resetStore();
       setIsDeleting(false);
     }
   };
