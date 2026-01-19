@@ -12,6 +12,7 @@ export default function ArticleView() {
   const { articleId } = useParams<{ articleId: string }>();
   const [searchParams] = useSearchParams();
   const { articles, loading, setSelectedArticle, fetchArticles } = useArticle();
+  const hasFetched = useArticle((s) => s.hasFetched);
   const { isAuthenticated, checkAuth } = useUser();
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -32,9 +33,12 @@ export default function ArticleView() {
     if (isInitialized && isAuthenticated) {
       // Avoid refetching when editing a temporary article to prevent it disappearing
       if (!articleId || articleId.startsWith("temp-")) return;
-      fetchArticles();
+      // Fetch only once per session; stops loops when list is empty
+      if (!hasFetched) {
+        fetchArticles();
+      }
     }
-  }, [isInitialized, isAuthenticated, fetchArticles, articleId]);
+  }, [isInitialized, isAuthenticated, fetchArticles, articleId, hasFetched]);
 
   // Set selected article when component mounts or articleId changes
   useEffect(() => {

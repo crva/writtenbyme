@@ -81,7 +81,7 @@ export default function SidebarArticles() {
                 </div>
               </SidebarMenuButton>
             </SidebarMenuItem>
-            {loading ? (
+            {loading && articles.length === 0 ? (
               <>
                 {[1, 2, 3].map((i) => (
                   <SidebarMenuItem key={`skeleton-${i}`}>

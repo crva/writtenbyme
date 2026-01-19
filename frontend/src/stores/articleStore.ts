@@ -18,14 +18,13 @@ type ArticleStore = {
   newArticles: Set<string>; // Track temporary IDs of articles not yet saved to API
   currentArticle: Article | null;
   loading: boolean;
+  hasFetched: boolean;
   addArticle: (title: string) => void;
   removeArticle: (id: string) => void;
   updateArticleContent: (id: string, content: string) => void;
   updateArticleTitle: (id: string, title: string) => void;
   setSelectedArticle: (id: string | null) => void;
-  saveChanges: (
-    id: string,
-  ) => Promise<{
+  saveChanges: (id: string) => Promise<{
     error?: string;
     success?: boolean;
     id?: string;
@@ -55,6 +54,7 @@ export const useArticle = create<ArticleStore>((set, get) => ({
   newArticles: new Set(),
   currentArticle: null,
   loading: false,
+  hasFetched: false,
 
   addArticle: (title: string) =>
     set((state) => {
@@ -258,7 +258,10 @@ export const useArticle = create<ArticleStore>((set, get) => ({
 
   fetchArticles: async () => {
     try {
-      set({ loading: true });
+      // Only show loading skeleton if we have no articles yet
+      set((currentState) =>
+        currentState.articles.length === 0 ? { loading: true } : {},
+      );
       const response = await getMyArticles();
 
       // Handle both array response and wrapped response
@@ -276,11 +279,12 @@ export const useArticle = create<ArticleStore>((set, get) => ({
           articles: [...fetched, ...tempArticles],
           newArticles: new Set(currentState.newArticles),
           loading: false,
+          hasFetched: true,
         };
       });
     } catch {
       toast.error("Failed to fetch articles");
-      set({ loading: false });
+      set({ loading: false, hasFetched: true });
     }
   },
 
@@ -342,5 +346,6 @@ export const useArticle = create<ArticleStore>((set, get) => ({
       newArticles: new Set(),
       currentArticle: null,
       loading: false,
+      hasFetched: false,
     }),
 }));
