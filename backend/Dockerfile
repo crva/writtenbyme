@@ -22,5 +22,5 @@ COPY --from=build /app/dist ./dist
 
 EXPOSE 3000
 
-# Start backend
-CMD ["sh", "-c", "node dist/index.js"]
+# Start backend by pushing schema (no SQL migrations needed)
+CMD ["sh", "-c", "npx drizzle-kit push && node dist/index.js"]

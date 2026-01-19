@@ -13,6 +13,7 @@ const checkoutLimiter = rateLimit({
   message: "Too many checkout requests. Please try again later",
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => req.ip || req.socket.remoteAddress || "",
   handler: (req, res) => {
     res.status(429).json({
       error: "Too many checkout requests. Please try again later",

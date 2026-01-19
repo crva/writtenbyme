@@ -20,6 +20,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.1",
+    "drizzle-kit": "^0.31.8",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
     "express-session": "^1.18.2",
@@ -49,7 +50,6 @@
     "@types/node": "^25.0.6",
     "@types/passport-local": "^1.0.38",
     "@types/pg": "^8.16.0",
-    "drizzle-kit": "^0.31.8",
     "tsx": "^4.21.0"
   }
 }

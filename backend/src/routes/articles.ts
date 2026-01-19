@@ -12,6 +12,7 @@ const articleMutationLimiter = rateLimit({
   message: "Too many article operations. Please try again later",
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => req.ip || req.socket.remoteAddress || "",
   handler: (req, res) => {
     res.status(429).json({
       error: "Too many article operations. Please try again later",

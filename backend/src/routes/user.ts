@@ -12,6 +12,7 @@ const updateUsernameLimiter = rateLimit({
   message: "Username can only be changed once every 5 minutes",
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => req.ip || req.socket.remoteAddress || "",
   handler: (req, res) => {
     res.status(429).json({
       error: "Username can only be changed once every 5 minutes",
