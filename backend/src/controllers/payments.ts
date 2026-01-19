@@ -8,10 +8,12 @@ import { db } from "../lib/db.js";
 import { logger } from "../lib/logger.js";
 import { AuthRequest } from "../types/auth.js";
 
-// Use sandbox environment for testing
+// Initialize Polar SDK with environment-specific server URL
 const polar = new Polar({
   accessToken: config.polar.accessToken,
-  serverURL: "https://sandbox-api.polar.sh",
+  serverURL: config.isDev
+    ? "https://sandbox-api.polar.sh"
+    : "https://api.polar.sh",
 });
 
 export const createCheckout = async (req: AuthRequest, res: Response) => {
@@ -45,7 +47,10 @@ export const createCheckout = async (req: AuthRequest, res: Response) => {
 
     return res.json({ checkoutUrl });
   } catch (error) {
-    logger.error({ error }, "Failed to create checkout");
+    // Try to extract provider error details for easier debugging
+    const err = error as any;
+    const providerError = err?.response?.data || err?.body || err?.message;
+    logger.error({ error: err, providerError }, "Failed to create checkout");
     res.status(500).json({ error: "Failed to create checkout" });
   }
 };
