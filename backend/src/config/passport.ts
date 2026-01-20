@@ -26,6 +26,7 @@ passport.deserializeUser(async (id: string, done) => {
       username: user.username,
       email: user.email,
       isPaid: user.isPaid,
+      polarSubscriptionId: user.polarSubscriptionId,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };

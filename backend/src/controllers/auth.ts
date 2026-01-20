@@ -191,6 +191,7 @@ export const verifyMagicLink = async (req: AuthRequest, res: Response) => {
       username: user.username,
       email: user.email,
       isPaid: user.isPaid,
+      polarSubscriptionId: user.polarSubscriptionId,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
