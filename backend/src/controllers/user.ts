@@ -9,6 +9,7 @@ import {
 } from "../db/schema.js";
 import { db } from "../lib/db.js";
 import { logger } from "../lib/logger.js";
+import { polar } from "../lib/polar.js";
 import { AuthRequest } from "../types/auth.js";
 
 const updateUsernameSchema = z.object({
@@ -94,6 +95,38 @@ export const deleteAccount = async (req: AuthRequest, res: Response) => {
     const userId = req.user.id;
 
     logger.info({ userId }, "Account deletion attempt");
+
+    // Fetch user to get subscription ID if it exists
+    const user = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, userId));
+
+    if (user.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Cancel Polar subscription if the user has one
+    if (user[0].polarSubscriptionId) {
+      try {
+        await polar.subscriptions.revoke({
+          id: user[0].polarSubscriptionId,
+        });
+        logger.info(
+          { userId, subscriptionId: user[0].polarSubscriptionId },
+          "Polar subscription revoked during account deletion",
+        );
+      } catch (error) {
+        logger.error(
+          { error, userId, subscriptionId: user[0].polarSubscriptionId },
+          "Failed to revoke Polar subscription during account deletion",
+        );
+        return res.status(500).json({
+          error:
+            "Unable to revoke subscription. Please contact support@writtenbyme.online",
+        });
+      }
+    }
 
     // Start a transaction to ensure all data is deleted
     // Drizzle doesn't have built-in transaction support for all databases,

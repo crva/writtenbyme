@@ -1,4 +1,3 @@
-import { Polar } from "@polar-sh/sdk";
 import crypto from "crypto";
 import { eq } from "drizzle-orm";
 import { Response } from "express";
@@ -6,15 +5,8 @@ import { config } from "../config/config.js";
 import { usersTable } from "../db/schema.js";
 import { db } from "../lib/db.js";
 import { logger } from "../lib/logger.js";
+import { polar } from "../lib/polar.js";
 import { AuthRequest } from "../types/auth.js";
-
-// Initialize Polar SDK with environment-specific server URL
-const polar = new Polar({
-  accessToken: config.polar.accessToken,
-  serverURL: config.isDev
-    ? "https://sandbox-api.polar.sh"
-    : "https://api.polar.sh",
-});
 
 export const createCheckout = async (req: AuthRequest, res: Response) => {
   try {
@@ -118,10 +110,10 @@ export const handleWebhook = async (
         return res.status(400).json({ error: "Missing userId in metadata" });
       }
 
-      // Update user as paid
+      // Update user as paid and store subscription ID
       await db
         .update(usersTable)
-        .set({ isPaid: true })
+        .set({ isPaid: true, polarSubscriptionId: event.data.id })
         .where(eq(usersTable.id, metadata.userId));
 
       logger.info(
@@ -142,10 +134,10 @@ export const handleWebhook = async (
         return res.status(400).json({ error: "Missing userId in metadata" });
       }
 
-      // Update user as not paid
+      // Update user as not paid and clear subscription ID
       await db
         .update(usersTable)
-        .set({ isPaid: false })
+        .set({ isPaid: false, polarSubscriptionId: null })
         .where(eq(usersTable.id, metadata.userId));
 
       logger.info(

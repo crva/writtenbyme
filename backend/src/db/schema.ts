@@ -15,6 +15,7 @@ export const usersTable = pgTable("User", {
   username: text("username").unique().notNull(),
   email: text("email").unique().notNull(),
   isPaid: boolean("isPaid").default(false).notNull(),
+  polarSubscriptionId: text("polarSubscriptionId"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });

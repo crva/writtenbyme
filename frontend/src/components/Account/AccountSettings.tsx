@@ -31,6 +31,7 @@ export default function AccountSettings({
   const [success, setSuccess] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const resetStore = useArticle((state) => state.resetStore);
 
   useEffect(() => {
@@ -70,11 +71,14 @@ export default function AccountSettings({
 
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
+    setDeleteError(null);
     try {
       await deleteAccount();
       onOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete account");
+      setDeleteError(
+        err instanceof Error ? err.message : "Failed to delete account",
+      );
     } finally {
       resetStore();
       setIsDeleting(false);
@@ -187,7 +191,16 @@ export default function AccountSettings({
 
       <ConfirmDialog
         open={deleteConfirmOpen}
-        onOpenChange={setDeleteConfirmOpen}
+        onOpenChange={(newOpen) => {
+          // Don't close if there's an error
+          if (!newOpen && deleteError) {
+            return;
+          }
+          setDeleteConfirmOpen(newOpen);
+          if (!newOpen) {
+            setDeleteError(null);
+          }
+        }}
         title="Delete Account?"
         description="This will permanently delete your account, all your articles, and all associated data. This action cannot be undone."
         confirmText="Delete Account"
@@ -195,6 +208,7 @@ export default function AccountSettings({
         isDestructive={true}
         isLoading={isDeleting}
         onConfirm={handleDeleteAccount}
+        error={deleteError}
       />
     </>
   );

@@ -19,6 +19,7 @@ interface ConfirmDialogProps {
   cancelText?: string;
   isDestructive?: boolean;
   isLoading?: boolean;
+  error?: string | null;
   onConfirm: () => void | Promise<void>;
 }
 
@@ -31,6 +32,7 @@ export default function ConfirmDialog({
   cancelText = "Cancel",
   isDestructive = false,
   isLoading = false,
+  error,
   onConfirm,
 }: ConfirmDialogProps) {
   return (
@@ -40,6 +42,7 @@ export default function ConfirmDialog({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
+        {error && <p className="text-sm text-destructive">{error}</p>}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isLoading}>
             {cancelText}
