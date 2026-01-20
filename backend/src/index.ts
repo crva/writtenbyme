@@ -33,9 +33,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Add 1 second delay for testing purposes
-app.use((req, res, next) => {
-  setTimeout(() => next(), 1000);
-});
+// app.use((req, res, next) => {
+//   setTimeout(() => next(), 1000);
+// });
 
 app.use("/auth", authRoutes);
 app.use("/user", userRoutes);
