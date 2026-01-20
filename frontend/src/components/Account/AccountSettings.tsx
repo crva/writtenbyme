@@ -10,9 +10,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
-import { Loader2, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
+import Loader from "../Loader";
 
 interface AccountSettingsProps {
   open: boolean;
@@ -58,10 +59,6 @@ export default function AccountSettings({
     try {
       await updateUsername(username);
       setSuccess(true);
-      // Give user feedback before closing
-      setTimeout(() => {
-        onOpenChange(false);
-      }, 1500);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to update username",
@@ -126,9 +123,7 @@ export default function AccountSettings({
                   disabled={isLoading}
                   className="min-w-24"
                 >
-                  {isLoading && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
+                  {isLoading && <Loader />}
                   {isLoading ? "Saving..." : "Save"}
                 </Button>
               </div>

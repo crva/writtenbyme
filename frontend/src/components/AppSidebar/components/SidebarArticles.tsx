@@ -68,19 +68,20 @@ export default function SidebarArticles() {
         <SidebarGroupLabel>Articles</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                className="text-muted-foreground"
-                onClick={() => handleNewArticleClick()}
-                disabled={!user}
-              >
-                <div className={`cursor-pointer`} onClick={() => {}}>
-                  <PlusCircle />
-                  <span>New article</span>
-                </div>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+            {user && (
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  className="text-muted-foreground"
+                  onClick={() => handleNewArticleClick()}
+                >
+                  <div className={`cursor-pointer`} onClick={() => {}}>
+                    <PlusCircle />
+                    <span>New article</span>
+                  </div>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )}
             {loading && articles.length === 0 ? (
               <>
                 {[1, 2, 3].map((i) => (

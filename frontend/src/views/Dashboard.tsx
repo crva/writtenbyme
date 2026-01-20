@@ -1,5 +1,6 @@
 import MagicLinkDialog from "@/components/Account/MagicLinkDialog";
 import AppSidebar from "@/components/AppSidebar/AppSidebar";
+import Loader from "@/components/Loader";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -85,11 +86,15 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
       <AppSidebar />
-      {isInitialized && isAuthenticated && (
+      {isInitialized && isAuthenticated ? (
         <main className="h-screen w-screen p-2.5 flex items-center justify-center">
           <p className="text-slate-600 dark:text-slate-400">
             Select or create an article to get started
           </p>
+        </main>
+      ) : (
+        <main className="h-screen w-screen p-2.5 flex items-center justify-center">
+          <Loader />
         </main>
       )}
     </SidebarProvider>

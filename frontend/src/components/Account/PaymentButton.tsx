@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { apiPost } from "@/lib/api";
-import { Loader2, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import Loader from "../Loader";
 
 interface PaymentButtonProps {
   isLoading?: boolean;
@@ -17,7 +18,7 @@ export default function PaymentButton({
     setLoading(true);
     try {
       const response = await apiPost<{ checkoutUrl: string }>(
-        "/payments/create-checkout"
+        "/payments/create-checkout",
       );
 
       if (response.checkoutUrl) {
@@ -37,11 +38,7 @@ export default function PaymentButton({
       disabled={loading || isLoading}
       className="w-full rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground py-2 h-auto"
     >
-      {loading || isLoading ? (
-        <Loader2 className="mr-2 size-4 animate-spin" />
-      ) : (
-        <Sparkles className="mr-2 size-4" />
-      )}
+      {loading || isLoading ? <Loader /> : <Sparkles className="mr-2 size-4" />}
       {loading || isLoading ? "Processing..." : "Upgrade to Pro - $5.99/month"}
     </Button>
   );

@@ -1,10 +1,10 @@
 import MagicLinkDialog from "@/components/Account/MagicLinkDialog";
 import AppSidebar from "@/components/AppSidebar/AppSidebar";
 import ArticleEditor from "@/components/Dashboard/ArticleEditor/ArticleEditor";
+import Loader from "@/components/Loader";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
-import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router";
 
@@ -51,7 +51,9 @@ export default function ArticleView() {
     return (
       <SidebarProvider>
         <AppSidebar />
-        <main className="h-screen w-screen p-2.5" />
+        <main className="h-screen w-screen p-2.5 flex items-center justify-center">
+          <Loader />
+        </main>
       </SidebarProvider>
     );
   }
@@ -66,7 +68,7 @@ export default function ArticleView() {
         <SidebarProvider>
           <AppSidebar />
           <div className="flex items-center justify-center flex-1">
-            <Loader2 className="h-8 w-8 animate-spin text-slate-600 dark:text-slate-400" />
+            <Loader />
           </div>
         </SidebarProvider>
       );
