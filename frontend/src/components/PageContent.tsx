@@ -36,8 +36,8 @@ export function PageLayout({
         <Separator />
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4 md:py-8">
+       {/* Main Content */}
+       <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4 py-8">
         {loading ? (
           <div className="flex flex-1 items-center justify-center">
             <Spinner />
