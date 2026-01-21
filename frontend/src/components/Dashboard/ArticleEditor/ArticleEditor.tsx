@@ -86,16 +86,16 @@ export default function ArticleEditor({
     };
   }, [handleSaveClick]);
 
-  return (
-    <main className="h-screen w-screen p-2.5 flex flex-col">
+   return (
+     <main className="flex flex-col h-full w-full p-2.5">
       <div className="md:hidden mb-2 -m-2.5 p-2.5 border-b">
         <SidebarTrigger />
       </div>
-      <Tabs
-        value={activeTab}
-        onValueChange={handleTabChange}
-        className="flex flex-col flex-1 w-full"
-      >
+       <Tabs
+         value={activeTab}
+         onValueChange={handleTabChange}
+         className="flex flex-col h-full w-full"
+       >
         <TabsList className="w-fit">
           <TabsTrigger value="editor" className="cursor-pointer">
             Editor
@@ -105,7 +105,7 @@ export default function ArticleEditor({
           </TabsTrigger>
         </TabsList>
 
-         <TabsContent value="editor" className="flex-1">
+          <TabsContent value="editor" className="flex-1 overflow-hidden">
            <div className="article-editor dark flex h-full w-full gap-4">
              <MDEditor
                className="flex-1"
