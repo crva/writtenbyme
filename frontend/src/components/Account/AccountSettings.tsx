@@ -12,7 +12,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { usePaidUser } from "@/hooks/usePaidUser";
 import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
-import { Trash2, X } from "lucide-react";
+import { CreditCard, LogOut, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import Loader from "../Loader";
@@ -139,118 +139,125 @@ export default function AccountSettings({
 
           <div className="space-y-6">
             {/* Username Section */}
-           <div className="space-y-3">
-               <label className="text-sm font-medium block mb-2">Username</label>
-               <div className="flex flex-col sm:flex-row gap-2">
-                 <Input
-                   value={username}
-                   onChange={(e) => {
-                     setUsername(e.target.value);
-                     setError(null);
-                     setSuccess(false);
-                   }}
-                   placeholder="Enter new username"
-                   disabled={isLoading}
-                 />
-                 <Button
-                   onClick={handleUpdateUsername}
-                   disabled={isLoading}
-                   className="min-w-24 sm:w-auto"
-                 >
-                   {isLoading && <Loader />}
-                   {isLoading ? "Saving..." : "Save"}
-                 </Button>
-               </div>
-               {error && <p className="text-sm text-destructive">{error}</p>}
-               {success && (
-                 <p className="text-sm text-green-600">
-                   Username updated successfully!
-                 </p>
-               )}
-             </div>
-
-             {/* Email Display */}
-             <div className="space-y-2">
-               <label className="text-sm font-medium block mb-2">Email</label>
-               <div className="px-3 py-2 bg-muted rounded-md text-sm text-muted-foreground">
-                 {user?.email}
-               </div>
-               <p className="text-xs text-muted-foreground">
-                 Email cannot be changed
-               </p>
-             </div>
-
-              {/* Pro Subscription Section */}
-              {isPaid && (
-                <div className="border-t pt-6">
-                  <div className="space-y-2 mb-4">
-                    <h3 className="text-sm font-semibold">
-                      Pro Subscription
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      You currently have a Pro subscription
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    onClick={() => setCancelSubConfirmOpen(true)}
-                    className="w-full gap-2 text-destructive border-destructive hover:bg-destructive/5"
-                    disabled={isCancelingSub}
-                  >
-                    {isCancelingSub ? (
-                      <Spinner className="mr-1" />
-                    ) : (
-                      <X className="h-4 w-4" />
-                    )}
-                    {isCancelingSub ? "Cancelling..." : "Cancel Subscription"}
-                  </Button>
-                  {cancelSubSuccess && (
-                    <p className="text-sm text-green-600 mt-2">
-                      Subscription cancelled successfully!
-                    </p>
-                  )}
-                </div>
-              )}
-
-             {/* Delete Account Section */}
-             <div className="border-t pt-6">
-               <div className="space-y-2 mb-4">
-                 <h3 className="text-sm font-semibold text-destructive">
-                   Danger Zone
-                 </h3>
-                 <p className="text-sm text-muted-foreground">
-                   Permanently delete your account and all associated data
-                 </p>
-               </div>
+            <div className="space-y-3">
+              <label className="text-sm font-medium block mb-2">Username</label>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Input
+                  value={username}
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                    setError(null);
+                    setSuccess(false);
+                  }}
+                  placeholder="Enter new username"
+                  disabled={isLoading}
+                />
                 <Button
-                  variant="destructive"
-                  onClick={() => setDeleteConfirmOpen(true)}
-                  className="w-full gap-2"
-                  disabled={isDeleting}
+                  onClick={handleUpdateUsername}
+                  disabled={isLoading}
+                  className="min-w-24 sm:w-auto"
                 >
-                  {isDeleting ? (
+                  {isLoading && <Loader />}
+                  {isLoading ? "Saving..." : "Save"}
+                </Button>
+              </div>
+              {error && <p className="text-sm text-destructive">{error}</p>}
+              {success && (
+                <p className="text-sm text-green-600">
+                  Username updated successfully!
+                </p>
+              )}
+            </div>
+
+            {/* Email Display */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium block mb-2">Email</label>
+              <div className="px-3 py-2 bg-muted rounded-md text-sm text-muted-foreground">
+                {user?.email}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Email cannot be changed
+              </p>
+            </div>
+
+            {/* Pro Subscription Section */}
+            {isPaid && (
+              <div className="bg-linear-to-br from-purple-50 to-violet-50 dark:from-purple-950/20 dark:to-violet-950/20 border border-purple-200 dark:border-purple-800 rounded-lg p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <CreditCard className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  <h3 className="text-sm font-semibold text-purple-900 dark:text-purple-100">
+                    Pro Subscription Active
+                  </h3>
+                </div>
+                <p className="text-sm text-purple-800 dark:text-purple-200 mb-4">
+                  You have access to all premium features. Your subscription
+                  renews automatically each month.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => setCancelSubConfirmOpen(true)}
+                  className="w-full gap-2 text-purple-600 dark:text-purple-400 border-purple-300 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-950/50"
+                  disabled={isCancelingSub}
+                >
+                  {isCancelingSub ? (
                     <Spinner className="mr-1" />
                   ) : (
-                    <Trash2 className="h-4 w-4" />
+                    <LogOut className="h-4 w-4" />
                   )}
-                  {isDeleting ? "Deleting..." : "Delete Account"}
+                  {isCancelingSub ? "Cancelling..." : "Cancel Subscription"}
                 </Button>
-             </div>
+                {cancelSubSuccess && (
+                  <p className="text-sm text-green-600 dark:text-green-400 mt-3 font-medium">
+                    ✓ Subscription cancelled successfully!
+                  </p>
+                )}
+                {cancelSubError && (
+                  <p className="text-sm text-destructive mt-3 font-medium">
+                    ✗ {cancelSubError}
+                  </p>
+                )}
+              </div>
+            )}
 
-             {/* Legal Links */}
-             <div className="border-t pt-6 flex flex-wrap justify-center items-center gap-2 sm:gap-4 text-xs sm:text-sm">
-               <Button variant="ghost" asChild className="text-xs sm:text-sm">
-                 <Link to="/privacy" target="_blank">
-                   Privacy Policy
-                 </Link>
-               </Button>
-               <span className="text-muted-foreground">•</span>
-               <Button variant="ghost" asChild className="text-xs sm:text-sm">
-                 <Link to="/terms" target="_blank">
-                   Terms of Service
-                 </Link>
-               </Button>
-             </div>
+            {/* Delete Account Section */}
+            <div className="border-t pt-6">
+              <div className="space-y-2 mb-4">
+                <h3 className="text-sm font-semibold text-destructive">
+                  Danger Zone
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Permanently delete your account and all associated data
+                </p>
+              </div>
+              <Button
+                variant="destructive"
+                onClick={() => setDeleteConfirmOpen(true)}
+                className="w-full gap-2"
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <Spinner className="mr-1" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
+                {isDeleting ? "Deleting..." : "Delete Account"}
+              </Button>
+            </div>
+
+            {/* Legal Links */}
+            <div className="border-t pt-6 flex flex-wrap justify-center items-center gap-2 sm:gap-4 text-xs sm:text-sm">
+              <Button variant="ghost" asChild className="text-xs sm:text-sm">
+                <Link to="/privacy" target="_blank">
+                  Privacy Policy
+                </Link>
+              </Button>
+              <span className="text-muted-foreground">•</span>
+              <Button variant="ghost" asChild className="text-xs sm:text-sm">
+                <Link to="/terms" target="_blank">
+                  Terms of Service
+                </Link>
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
