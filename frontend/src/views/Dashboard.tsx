@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
 import { useEffect, useState } from "react";
@@ -86,17 +86,22 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
       <AppSidebar />
-      {isInitialized && isAuthenticated ? (
-        <main className="h-screen w-screen p-2.5 flex items-center justify-center">
-          <p className="text-slate-600 dark:text-slate-400">
-            Select or create an article to get started
-          </p>
-        </main>
-      ) : (
-        <main className="h-screen w-screen p-2.5 flex items-center justify-center">
-          <Loader />
-        </main>
-      )}
+      <SidebarInset>
+        <div className="md:hidden p-2 border-b">
+          <SidebarTrigger />
+        </div>
+        {isInitialized && isAuthenticated ? (
+          <main className="flex-1 flex items-center justify-center p-2.5">
+            <p className="text-slate-600 dark:text-slate-400">
+              Select or create an article to get started
+            </p>
+          </main>
+        ) : (
+          <main className="flex-1 flex items-center justify-center p-2.5">
+            <Loader />
+          </main>
+        )}
+      </SidebarInset>
     </SidebarProvider>
   );
 }

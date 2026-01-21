@@ -1,6 +1,7 @@
 import UpgradeProDialog from "@/components/Account/UpgradeProDialog";
 import AnalyticsDashboard from "@/components/Dashboard/AnalyticsDashboard/AnalyticsDashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useSaveArticle } from "@/hooks/useSaveArticle";
 import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
@@ -68,11 +69,14 @@ export default function ArticleEditor({
   }, [handleSaveClick]);
 
   return (
-    <main className="h-screen w-screen p-2.5">
+    <main className="h-screen w-screen p-2.5 flex flex-col">
+      <div className="md:hidden mb-2 -m-2.5 p-2.5 border-b">
+        <SidebarTrigger />
+      </div>
       <Tabs
         value={activeTab}
         onValueChange={handleTabChange}
-        className="flex flex-col h-full w-full"
+        className="flex flex-col flex-1 w-full"
       >
         <TabsList className="w-fit">
           <TabsTrigger value="editor" className="cursor-pointer">

@@ -110,35 +110,35 @@ export default function AccountSettings({
 
           <div className="space-y-6">
             {/* Username Section */}
-            <div className="space-y-3">
-              <label className="text-sm font-medium block mb-2">Username</label>
-              <div className="flex gap-2">
-                <Input
-                  value={username}
-                  onChange={(e) => {
-                    setUsername(e.target.value);
-                    setError(null);
-                    setSuccess(false);
-                  }}
-                  placeholder="Enter new username"
-                  disabled={isLoading}
-                />
-                <Button
-                  onClick={handleUpdateUsername}
-                  disabled={isLoading}
-                  className="min-w-24"
-                >
-                  {isLoading && <Loader />}
-                  {isLoading ? "Saving..." : "Save"}
-                </Button>
-              </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              {success && (
-                <p className="text-sm text-green-600">
-                  Username updated successfully!
-                </p>
-              )}
-            </div>
+           <div className="space-y-3">
+               <label className="text-sm font-medium block mb-2">Username</label>
+               <div className="flex flex-col sm:flex-row gap-2">
+                 <Input
+                   value={username}
+                   onChange={(e) => {
+                     setUsername(e.target.value);
+                     setError(null);
+                     setSuccess(false);
+                   }}
+                   placeholder="Enter new username"
+                   disabled={isLoading}
+                 />
+                 <Button
+                   onClick={handleUpdateUsername}
+                   disabled={isLoading}
+                   className="min-w-24 sm:w-auto"
+                 >
+                   {isLoading && <Loader />}
+                   {isLoading ? "Saving..." : "Save"}
+                 </Button>
+               </div>
+               {error && <p className="text-sm text-destructive">{error}</p>}
+               {success && (
+                 <p className="text-sm text-green-600">
+                   Username updated successfully!
+                 </p>
+               )}
+             </div>
 
             {/* Email Display */}
             <div className="space-y-2">
@@ -176,20 +176,20 @@ export default function AccountSettings({
                </Button>
             </div>
 
-            {/* Legal Links */}
-            <div className="border-t pt-6 flex justify-center items-center gap-4 flex-wrap text-sm">
-              <Button variant="ghost" asChild>
-                <Link to="/privacy" target="_blank">
-                  Privacy Policy
-                </Link>
-              </Button>
-              <span className="text-muted-foreground">•</span>
-              <Button variant="ghost" asChild>
-                <Link to="/terms" target="_blank">
-                  Terms of Service
-                </Link>
-              </Button>
-            </div>
+             {/* Legal Links */}
+             <div className="border-t pt-6 flex flex-wrap justify-center items-center gap-2 sm:gap-4 text-xs sm:text-sm">
+               <Button variant="ghost" asChild className="text-xs sm:text-sm">
+                 <Link to="/privacy" target="_blank">
+                   Privacy Policy
+                 </Link>
+               </Button>
+               <span className="text-muted-foreground">•</span>
+               <Button variant="ghost" asChild className="text-xs sm:text-sm">
+                 <Link to="/terms" target="_blank">
+                   Terms of Service
+                 </Link>
+               </Button>
+             </div>
           </div>
         </DialogContent>
       </Dialog>

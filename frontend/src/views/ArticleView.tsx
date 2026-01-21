@@ -2,7 +2,7 @@ import MagicLinkDialog from "@/components/Account/MagicLinkDialog";
 import AppSidebar from "@/components/AppSidebar/AppSidebar";
 import ArticleEditor from "@/components/Dashboard/ArticleEditor/ArticleEditor";
 import Loader from "@/components/Loader";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
 import { useEffect, useState } from "react";
@@ -45,51 +45,68 @@ export default function ArticleView() {
     }
   }, [articleId, article, setSelectedArticle]);
 
-  if (!isInitialized) {
-    return (
-      <SidebarProvider>
-        <AppSidebar />
-        <main className="h-screen w-screen p-2.5 flex items-center justify-center">
-          <Loader />
-        </main>
-      </SidebarProvider>
-    );
-  }
+   if (!isInitialized) {
+     return (
+       <SidebarProvider>
+         <AppSidebar />
+         <SidebarInset>
+           <div className="md:hidden p-2 border-b">
+             <SidebarTrigger />
+           </div>
+           <main className="flex-1 flex items-center justify-center p-2.5">
+             <Loader />
+           </main>
+         </SidebarInset>
+       </SidebarProvider>
+     );
+   }
 
-  if (!isAuthenticated) {
-    return <MagicLinkDialog open={true} onOpenChange={() => {}} />;
-  }
+   if (!isAuthenticated) {
+     return <MagicLinkDialog open={true} onOpenChange={() => {}} />;
+   }
 
-  if (!article) {
-    if (loading) {
-      return (
-        <SidebarProvider>
-          <AppSidebar />
-          <div className="flex items-center justify-center flex-1">
-            <Loader />
-          </div>
-        </SidebarProvider>
-      );
-    }
-    return (
-      <SidebarProvider>
-        <AppSidebar />
-        <div className="flex items-center justify-center flex-1">
-          <p className="text-slate-600 dark:text-slate-400">
-            Article not found
-          </p>
-        </div>
-      </SidebarProvider>
-    );
-  }
+   if (!article) {
+     if (loading) {
+       return (
+         <SidebarProvider>
+           <AppSidebar />
+           <SidebarInset>
+             <div className="md:hidden p-2 border-b">
+               <SidebarTrigger />
+             </div>
+             <div className="flex-1 flex items-center justify-center">
+               <Loader />
+             </div>
+           </SidebarInset>
+         </SidebarProvider>
+       );
+     }
+     return (
+       <SidebarProvider>
+         <AppSidebar />
+         <SidebarInset>
+           <div className="md:hidden p-2 border-b">
+             <SidebarTrigger />
+           </div>
+           <div className="flex-1 flex items-center justify-center">
+             <p className="text-slate-600 dark:text-slate-400">
+               Article not found
+             </p>
+           </div>
+         </SidebarInset>
+       </SidebarProvider>
+     );
+   }
 
-  return (
-    <SidebarProvider>
-      <AppSidebar />
-      <ArticleEditor
-        article={article}
-        initialTab={tab as "editor" | "analytics"}
-      />
-    </SidebarProvider>
-  );
+   return (
+     <SidebarProvider>
+       <AppSidebar />
+       <SidebarInset>
+         <ArticleEditor
+           article={article}
+           initialTab={tab as "editor" | "analytics"}
+         />
+       </SidebarInset>
+     </SidebarProvider>
+   );
 }

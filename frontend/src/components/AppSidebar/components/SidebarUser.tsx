@@ -16,6 +16,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { usePaidUser } from "@/hooks/usePaidUser";
+import { useIsMobile } from "@/hooks/useMobile";
 import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
 import { EllipsisVertical, LogOut, UserCircle, Zap } from "lucide-react";
@@ -25,6 +26,7 @@ import ProBadge from "./ProBadge";
 export default function SidebarUser() {
   const { user, logout, isAuthenticated } = useUser();
   const isPaid = usePaidUser();
+  const isMobile = useIsMobile();
   const resetStore = useArticle((state) => state.resetStore);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
   const [accountSettingsOpen, setAccountSettingsOpen] = useState(false);
@@ -74,12 +76,12 @@ export default function SidebarUser() {
               <EllipsisVertical className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side="right"
-            align="end"
-            sideOffset={4}
-          >
+           <DropdownMenuContent
+             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg max-w-[calc(100vw-2rem)]"
+             side={isMobile ? "top" : "right"}
+             align="end"
+             sideOffset={4}
+           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">

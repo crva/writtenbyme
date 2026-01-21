@@ -9,7 +9,6 @@ import {
   TrendingUp,
   Users,
   X,
-  Zap,
 } from "lucide-react";
 import { useRef } from "react";
 import { Link, useNavigate } from "react-router";
@@ -249,13 +248,13 @@ export default function Landing() {
 
               {/* Pro Plan - Featured */}
               <div className="relative group p-10 rounded-2xl border-2 border-primary bg-linear-to-br from-primary/15 to-primary/5 backdrop-blur hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300">
-                {/* Popular Badge */}
-                <div className="absolute -top-5 left-1/2 -translate-x-1/2">
-                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold shadow-lg">
-                    <Zap className="size-4" />
-                    Most Popular
-                  </span>
-                </div>
+                 {/* Popular Badge */}
+                 <div className="absolute -top-5 left-1/2 -translate-x-1/2">
+                   <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold shadow-lg">
+                     <Sparkles className="size-4" />
+                     Essential
+                   </span>
+                 </div>
 
                 <div className="relative space-y-8 pt-2">
                   {/* Header */}
