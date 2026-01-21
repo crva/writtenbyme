@@ -109,6 +109,7 @@ export const createArticle = async (req: AuthRequest, res: Response) => {
         title: article.title,
         slug: article.slug,
         content: article.content,
+        status: article.status,
         createdAt: article.createdAt.toISOString(),
         updatedAt: article.updatedAt.toISOString(),
       },
@@ -189,6 +190,7 @@ export const updateArticle = async (req: AuthRequest, res: Response) => {
         title: updated.title,
         slug: updated.slug,
         content: updated.content,
+        status: updated.status,
         createdAt: updated.createdAt.toISOString(),
         updatedAt: updated.updatedAt.toISOString(),
       },
@@ -283,14 +285,22 @@ export const getUserArticles = async (req: AuthRequest, res: Response) => {
       .where(eq(articlesTable.userId, user.id))
       .orderBy(desc(articlesTable.createdAt));
 
-    res.json({
-      username: user.username,
-      articles: articles.map((article) => ({
+    // Filter out locked articles for non-owners
+    const filteredArticles = articles
+      .filter((article) => {
+        return article.status === "published";
+      })
+      .map((article) => ({
         id: article.id,
         title: article.title,
         updatedAt: article.updatedAt.toISOString(),
         slug: article.slug,
-      })),
+        status: article.status,
+      }));
+
+    res.json({
+      username: user.username,
+      articles: filteredArticles,
     });
   } catch (error) {
     logger.error(
@@ -337,12 +347,24 @@ export const getArticleBySlug = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: "Article not found" });
     }
 
+    // Check if article is locked and user is not the owner
+    if (article.status === "locked" && req.user?.id !== user.id) {
+      logger.warn(
+        { username, articleSlug, userId: req.user?.id },
+        "Access denied: article is locked for non-owner",
+      );
+      return res
+        .status(403)
+        .json({ error: "This article is locked and not accessible" });
+    }
+
     res.json({
       article: {
         id: article.id,
         title: article.title,
         slug: article.slug,
         content: article.content,
+        status: article.status,
         author: user.username,
         createdAt: article.createdAt.toISOString(),
         updatedAt: article.updatedAt.toISOString(),
@@ -386,6 +408,7 @@ export const getMyArticles = async (req: AuthRequest, res: Response) => {
         updatedAt: article.updatedAt.toISOString(),
         createdAt: article.createdAt.toISOString(),
         content: article.content,
+        status: article.status,
       })),
     });
   } catch (error) {

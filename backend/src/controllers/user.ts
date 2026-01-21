@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, not } from "drizzle-orm";
 import { Response } from "express";
 import { z } from "zod";
 import {
@@ -174,5 +174,118 @@ export const deleteAccount = async (req: AuthRequest, res: Response) => {
   } catch (error) {
     logger.error({ error }, "Account deletion error");
     res.status(500).json({ error: "Failed to delete account" });
+  }
+};
+
+export const cancelSubscription = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const userId = req.user.id;
+
+    logger.info({ userId }, "Subscription cancellation attempt");
+
+    // Fetch user to get subscription ID
+    const user = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, userId));
+
+    if (user.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (!user[0].isPaid) {
+      return res.status(400).json({ error: "User does not have an active subscription" });
+    }
+
+    // Cancel Polar subscription
+    if (user[0].polarSubscriptionId) {
+      try {
+        await polar.subscriptions.revoke({
+          id: user[0].polarSubscriptionId,
+        });
+        logger.info(
+          { userId, subscriptionId: user[0].polarSubscriptionId },
+          "Polar subscription revoked",
+        );
+      } catch (error) {
+        logger.error(
+          { error, userId, subscriptionId: user[0].polarSubscriptionId },
+          "Failed to revoke Polar subscription",
+        );
+        return res.status(500).json({
+          error:
+            "Unable to cancel subscription. Please contact support@writtenbyme.online",
+        });
+      }
+    }
+
+    // Get user's first article (by createdAt) to exclude it from locking
+    const firstArticle = await db
+      .select({ id: articlesTable.id })
+      .from(articlesTable)
+      .where(eq(articlesTable.userId, userId))
+      .orderBy(articlesTable.createdAt)
+      .limit(1);
+
+    const firstArticleId = firstArticle.length > 0 ? firstArticle[0].id : null;
+
+    // Lock all articles except the first one using NOT condition
+    if (firstArticleId) {
+      // Get all articles to lock (all except first)
+      const articlesToLock = await db
+        .select({ id: articlesTable.id })
+        .from(articlesTable)
+        .where(
+          and(
+            eq(articlesTable.userId, userId),
+            not(eq(articlesTable.id, firstArticleId))
+          ),
+        );
+
+      // Update each article to locked
+      for (const article of articlesToLock) {
+        await db
+          .update(articlesTable)
+          .set({ status: "locked" })
+          .where(eq(articlesTable.id, article.id));
+      }
+
+      logger.info(
+        { userId, firstArticleId, lockedCount: articlesToLock.length },
+        "Articles locked except first",
+      );
+    }
+
+    // Update user: set isPaid to false and clear subscription ID
+    const updatedUsers = await db
+      .update(usersTable)
+      .set({ isPaid: false, polarSubscriptionId: null })
+      .where(eq(usersTable.id, userId))
+      .returning();
+
+    const updatedUser = updatedUsers[0];
+
+    logger.info(
+      { userId, subscriptionId: user[0].polarSubscriptionId },
+      "Subscription cancelled - articles locked",
+    );
+
+    return res.json({
+      success: true,
+      user: {
+        id: updatedUser.id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        isPaid: updatedUser.isPaid,
+      },
+      message: "Subscription cancelled successfully. Your articles (except the first one) have been locked.",
+    });
+  } catch (error) {
+    logger.error({ error, userId: req.user?.id }, "Subscription cancellation error");
+    res.status(500).json({ error: "Failed to cancel subscription" });
   }
 };

@@ -9,9 +9,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { usePaidUser } from "@/hooks/usePaidUser";
 import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
-import { Trash2 } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import Loader from "../Loader";
@@ -25,14 +26,19 @@ export default function AccountSettings({
   open,
   onOpenChange,
 }: AccountSettingsProps) {
-  const { user, updateUsername, deleteAccount } = useUser();
+  const { user, updateUsername, deleteAccount, cancelSubscription } = useUser();
+  const isPaid = usePaidUser();
   const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [cancelSubSuccess, setCancelSubSuccess] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [cancelSubConfirmOpen, setCancelSubConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isCancelingSub, setIsCancelingSub] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [cancelSubError, setCancelSubError] = useState<string | null>(null);
   const resetStore = useArticle((state) => state.resetStore);
 
   useEffect(() => {
@@ -40,6 +46,7 @@ export default function AccountSettings({
       setUsername(user.username);
       setError(null);
       setSuccess(false);
+      setCancelSubSuccess(false);
     }
   }, [user, open]);
 
@@ -83,6 +90,28 @@ export default function AccountSettings({
     } finally {
       resetStore();
       setIsDeleting(false);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    setIsCancelingSub(true);
+    setCancelSubError(null);
+    setCancelSubSuccess(false);
+    try {
+      await cancelSubscription();
+      // Reset articles store to fetch fresh data
+      resetStore();
+      // Fetch fresh articles with new subscription status
+      const { fetchArticles } = useArticle.getState();
+      await fetchArticles();
+      setCancelSubSuccess(true);
+      setCancelSubConfirmOpen(false);
+    } catch (err) {
+      setCancelSubError(
+        err instanceof Error ? err.message : "Failed to cancel subscription",
+      );
+    } finally {
+      setIsCancelingSub(false);
     }
   };
 
@@ -140,41 +169,73 @@ export default function AccountSettings({
                )}
              </div>
 
-            {/* Email Display */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium block mb-2">Email</label>
-              <div className="px-3 py-2 bg-muted rounded-md text-sm text-muted-foreground">
-                {user?.email}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Email cannot be changed
-              </p>
-            </div>
+             {/* Email Display */}
+             <div className="space-y-2">
+               <label className="text-sm font-medium block mb-2">Email</label>
+               <div className="px-3 py-2 bg-muted rounded-md text-sm text-muted-foreground">
+                 {user?.email}
+               </div>
+               <p className="text-xs text-muted-foreground">
+                 Email cannot be changed
+               </p>
+             </div>
 
-            {/* Delete Account Section */}
-            <div className="border-t pt-6">
-              <div className="space-y-2 mb-4">
-                <h3 className="text-sm font-semibold text-destructive">
-                  Danger Zone
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  Permanently delete your account and all associated data
-                </p>
-              </div>
-               <Button
-                 variant="destructive"
-                 onClick={() => setDeleteConfirmOpen(true)}
-                 className="w-full gap-2"
-                 disabled={isDeleting}
-               >
-                 {isDeleting ? (
-                   <Spinner className="mr-1" />
-                 ) : (
-                   <Trash2 className="h-4 w-4" />
-                 )}
-                 {isDeleting ? "Deleting..." : "Delete Account"}
-               </Button>
-            </div>
+              {/* Pro Subscription Section */}
+              {isPaid && (
+                <div className="border-t pt-6">
+                  <div className="space-y-2 mb-4">
+                    <h3 className="text-sm font-semibold">
+                      Pro Subscription
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      You currently have a Pro subscription
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => setCancelSubConfirmOpen(true)}
+                    className="w-full gap-2 text-destructive border-destructive hover:bg-destructive/5"
+                    disabled={isCancelingSub}
+                  >
+                    {isCancelingSub ? (
+                      <Spinner className="mr-1" />
+                    ) : (
+                      <X className="h-4 w-4" />
+                    )}
+                    {isCancelingSub ? "Cancelling..." : "Cancel Subscription"}
+                  </Button>
+                  {cancelSubSuccess && (
+                    <p className="text-sm text-green-600 mt-2">
+                      Subscription cancelled successfully!
+                    </p>
+                  )}
+                </div>
+              )}
+
+             {/* Delete Account Section */}
+             <div className="border-t pt-6">
+               <div className="space-y-2 mb-4">
+                 <h3 className="text-sm font-semibold text-destructive">
+                   Danger Zone
+                 </h3>
+                 <p className="text-sm text-muted-foreground">
+                   Permanently delete your account and all associated data
+                 </p>
+               </div>
+                <Button
+                  variant="destructive"
+                  onClick={() => setDeleteConfirmOpen(true)}
+                  className="w-full gap-2"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <Spinner className="mr-1" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                  {isDeleting ? "Deleting..." : "Delete Account"}
+                </Button>
+             </div>
 
              {/* Legal Links */}
              <div className="border-t pt-6 flex flex-wrap justify-center items-center gap-2 sm:gap-4 text-xs sm:text-sm">
@@ -214,6 +275,28 @@ export default function AccountSettings({
         isLoading={isDeleting}
         onConfirm={handleDeleteAccount}
         error={deleteError}
+      />
+
+      <ConfirmDialog
+        open={cancelSubConfirmOpen}
+        onOpenChange={(newOpen) => {
+          // Don't close if there's an error
+          if (!newOpen && cancelSubError) {
+            return;
+          }
+          setCancelSubConfirmOpen(newOpen);
+          if (!newOpen) {
+            setCancelSubError(null);
+          }
+        }}
+        title="Cancel Subscription?"
+        description="If you cancel your subscription, all articles you wrote after your first one will be locked. Your first article will remain published and accessible. You can resubscribe anytime to unlock all your articles again."
+        confirmText="Cancel Subscription"
+        cancelText="Keep Subscription"
+        isDestructive={true}
+        isLoading={isCancelingSub}
+        onConfirm={handleCancelSubscription}
+        error={cancelSubError}
       />
     </>
   );

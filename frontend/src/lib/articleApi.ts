@@ -10,6 +10,7 @@ export interface ArticleListResponse {
   id: string;
   slug: string;
   title: string;
+  status?: "published" | "locked";
   updatedAt: string;
   createdAt: string;
 }
@@ -23,6 +24,7 @@ export interface ArticleResponse extends Omit<Article, "id"> {
   id: string;
   slug: string;
   userId: string;
+  status?: "published" | "locked";
   createdAt: string;
   updatedAt: string;
 }

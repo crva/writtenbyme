@@ -64,15 +64,15 @@ export default function SidebarUser() {
                   {initials}
                 </AvatarFallback>
               </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <div>
-                  <span className="truncate font-medium">{user.username}</span>
-                  {isPaid && <ProBadge />}
-                </div>
-                <span className="text-muted-foreground truncate text-xs">
-                  {user.email}
-                </span>
-              </div>
+               <div className="grid flex-1 text-left text-sm leading-tight">
+                 <div className="flex items-center gap-1 min-w-0">
+                   <span className="truncate font-medium">{user.username}</span>
+                   {isPaid && <ProBadge />}
+                 </div>
+                 <span className="text-muted-foreground truncate text-xs">
+                   {user.email}
+                 </span>
+               </div>
               <EllipsisVertical className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>

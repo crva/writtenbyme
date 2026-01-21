@@ -18,6 +18,7 @@ type ArticleStore = {
   currentArticle: Article | null;
   loading: boolean;
   hasFetched: boolean;
+  articleError: string | null;
   addArticle: (title: string) => Promise<{
     error?: string;
     success?: boolean;
@@ -51,6 +52,7 @@ export const useArticle = create<ArticleStore>((set, get) => ({
   currentArticle: null,
   loading: false,
   hasFetched: false,
+  articleError: null,
 
   addArticle: async (title: string) => {
     try {
@@ -251,7 +253,7 @@ export const useArticle = create<ArticleStore>((set, get) => ({
 
   fetchArticleBySlug: async (username: string, slug: string) => {
     try {
-      set({ loading: true });
+      set({ loading: true, articleError: null });
       const response = await getArticleBySlug(username, slug);
 
       set({
@@ -260,16 +262,29 @@ export const useArticle = create<ArticleStore>((set, get) => ({
           title: response.article.title,
           slug: response.article.slug,
           content: response.article.content,
+          status: response.article.status,
           createdAt: response.article.createdAt,
           updatedAt: response.article.updatedAt,
           author: response.article.author,
         },
         loading: false,
+        articleError: null,
       });
-    } catch {
-      set({ currentArticle: null, loading: false });
-      // Redirect to homepage on error (unknown article)
-      window.location.href = "/";
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to fetch article";
+      
+      // Check if it's a locked article error
+      if (errorMessage.includes("locked")) {
+        set({ 
+          currentArticle: null, 
+          loading: false,
+          articleError: "This article is locked and not accessible."
+        });
+      } else {
+        set({ currentArticle: null, loading: false, articleError: errorMessage });
+        // Redirect to homepage on other errors
+        window.location.href = "/";
+      }
     }
   },
 
@@ -284,5 +299,6 @@ export const useArticle = create<ArticleStore>((set, get) => ({
       currentArticle: null,
       loading: false,
       hasFetched: false,
+      articleError: null,
     }),
 }));

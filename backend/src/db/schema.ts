@@ -44,6 +44,7 @@ export const articlesTable = pgTable(
     title: text("title").notNull(),
     slug: text("slug").notNull(),
     content: text("content").notNull(),
+    status: text("status").default("published").notNull(), // "published" or "locked"
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().notNull(),
   },

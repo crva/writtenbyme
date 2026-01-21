@@ -3,6 +3,7 @@ export type Article = {
   title: string;
   slug?: string;
   content: string;
+  status?: "published" | "locked";
   createdAt: string;
   updatedAt: string;
   author?: string;

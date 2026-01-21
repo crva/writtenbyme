@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { eq } from "drizzle-orm";
 import { Response } from "express";
 import { config } from "../config/config.js";
-import { usersTable } from "../db/schema.js";
+import { articlesTable, usersTable } from "../db/schema.js";
 import { db } from "../lib/db.js";
 import { logger } from "../lib/logger.js";
 import { polar } from "../lib/polar.js";
@@ -116,9 +116,15 @@ export const handleWebhook = async (
         .set({ isPaid: true, polarSubscriptionId: event.data.id })
         .where(eq(usersTable.id, metadata.userId));
 
+      // Unlock all articles when user resubscribes
+      await db
+        .update(articlesTable)
+        .set({ status: "published" })
+        .where(eq(articlesTable.userId, metadata.userId));
+
       logger.info(
         { userId: metadata.userId, subscriptionId: event.data.id },
-        "User subscription activated - upgraded to Pro",
+        "User subscription activated - upgraded to Pro, all articles unlocked",
       );
     }
 

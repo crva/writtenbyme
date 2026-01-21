@@ -16,6 +16,7 @@ type UserStoreActions = {
   checkAuth: () => Promise<void>;
   updateUsername: (username: string) => Promise<void>;
   deleteAccount: () => Promise<void>;
+  cancelSubscription: () => Promise<void>;
   clearError: () => void;
 };
 
@@ -119,6 +120,23 @@ export const useUser = create<UserStore>((set) => ({
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to delete account";
+      set({ error: errorMessage, isLoading: false });
+      throw err;
+    }
+  },
+
+  cancelSubscription: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const data = await apiPost<{ user: User }>("/user/cancel-subscription", {});
+      set({
+        user: data.user,
+        isLoading: false,
+        error: null,
+      });
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to cancel subscription";
       set({ error: errorMessage, isLoading: false });
       throw err;
     }

@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { usePaidUser } from "@/hooks/usePaidUser";
 import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
-import { Newspaper, Plus } from "lucide-react";
+import { Lock, Newspaper, Plus } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import ArticleSettings from "./ArticleSettings";
@@ -34,7 +34,12 @@ export default function SidebarArticles() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
 
-  const handleArticleSelect = (id: string) => {
+  const handleArticleSelect = (id: string, status?: "published" | "locked") => {
+    // If article is locked, show upgrade dialog instead
+    if (status === "locked") {
+      setUpgradeDialogOpen(true);
+      return;
+    }
     setSelectedArticle(id);
     const tab = searchParams.get("tab") || "editor";
     navigate(`/dashboard/articles/${id}?tab=${tab}`);
@@ -107,11 +112,16 @@ export default function SidebarArticles() {
                       className={`flex justify-between items-center cursor-pointer gap-2 ${
                         selectedArticleId === article.id ? "bg-primary" : null
                       }`}
-                      onClick={() => handleArticleSelect(article.id)}
+                      onClick={() =>
+                        handleArticleSelect(article.id, article.status)
+                      }
                     >
                       <div className="flex items-center gap-2 min-w-0 ">
                         <Newspaper className="size-4 shrink-0" />
                         <ArticleTitle title={article.title} />
+                        {article.status === "locked" && (
+                          <Lock className="size-4 shrink-0 text-destructive" />
+                        )}
                       </div>
                       <ArticleSettings articleId={article.id} />
                     </div>

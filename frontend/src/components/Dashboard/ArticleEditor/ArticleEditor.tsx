@@ -27,16 +27,29 @@ export default function ArticleEditor({
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [activeTab, setActiveTab] = useState(initialTab);
 
+  // Check if article is locked
+  const isLocked = article.status === "locked";
+
   const { handleSave } = useSaveArticle({
     navigateToNewId: true,
     activeTab,
   });
 
   const handleContentChange = (content: string) => {
+    // Prevent editing locked articles
+    if (isLocked) {
+      setShowUpgradeDialog(true);
+      return;
+    }
     updateArticleContent(article.id, content);
   };
 
   const handleTabChange = (tabValue: string) => {
+    // If article is locked, show upgrade dialog
+    if (isLocked && tabValue === "editor") {
+      setShowUpgradeDialog(true);
+      return;
+    }
     // If user is not paid and trying to access analytics, show upgrade dialog
     if (tabValue === "analytics" && !user?.isPaid) {
       setShowUpgradeDialog(true);
@@ -50,8 +63,13 @@ export default function ArticleEditor({
   };
 
   const handleSaveClick = useCallback(async () => {
+    // Prevent saving locked articles
+    if (isLocked) {
+      setShowUpgradeDialog(true);
+      return;
+    }
     await handleSave(article.id);
-  }, [handleSave, article.id]);
+  }, [handleSave, article.id, isLocked]);
 
   // Used to handle save on CTRL+S
   useEffect(() => {
@@ -87,16 +105,26 @@ export default function ArticleEditor({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="editor" className="flex-1">
-          <div className="article-editor dark flex h-full w-full gap-4">
-            <MDEditor
-              className="flex-1"
-              value={article.content}
-              onChange={(val) => handleContentChange(val || "")}
-              visibleDragbar={false}
-            />
-          </div>
-        </TabsContent>
+         <TabsContent value="editor" className="flex-1">
+           <div className="article-editor dark flex h-full w-full gap-4">
+             <MDEditor
+               className="flex-1"
+               value={article.content}
+               onChange={(val) => handleContentChange(val || "")}
+               visibleDragbar={false}
+               preview={isLocked ? "preview" : "live"}
+               hideToolbar={isLocked}
+               height={isLocked ? 400 : undefined}
+             />
+             {isLocked && (
+               <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded pointer-events-none">
+                 <p className="text-white font-semibold text-center">
+                   This article is locked. Resubscribe to edit.
+                 </p>
+               </div>
+             )}
+           </div>
+         </TabsContent>
 
         {user?.isPaid && (
           <TabsContent value="analytics" className="flex-1 overflow-auto">

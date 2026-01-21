@@ -1,6 +1,6 @@
 import { Router } from "express";
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
-import { deleteAccount, updateUsername } from "../controllers/user.js";
+import { cancelSubscription, deleteAccount, updateUsername } from "../controllers/user.js";
 import { requireAuth } from "../middleware/auth.js";
 
 const router = Router();
@@ -29,5 +29,6 @@ router.post(
   updateUsername,
 );
 router.post("/delete-account", requireAuth, deleteAccount);
+router.post("/cancel-subscription", requireAuth, cancelSubscription);
 
 export default router;
