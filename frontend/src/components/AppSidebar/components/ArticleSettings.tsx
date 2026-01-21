@@ -16,15 +16,9 @@ import {
 import { useSaveArticle } from "@/hooks/useSaveArticle";
 import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
-import {
-  Check,
-  Ellipsis,
-  ExternalLink,
-  Pen,
-  Trash2,
-  X,
-} from "lucide-react";
+import { Check, Ellipsis, ExternalLink, Pen, Trash2, X } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import ArticleRenameDialog from "./ArticleRenameDialog";
 
 type Props = {
@@ -32,9 +26,11 @@ type Props = {
 };
 
 export default function ArticleSettings({ articleId }: Props) {
-  const { removeArticle, discardChanges, articles, unsavedChanges } = useArticle();
+  const { removeArticle, discardChanges, articles, unsavedChanges } =
+    useArticle();
   const { user } = useUser();
   const { handleSave } = useSaveArticle();
+  const navigate = useNavigate();
 
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -58,6 +54,8 @@ export default function ArticleSettings({ articleId }: Props) {
     try {
       await removeArticle(articleId);
       setDeleteConfirmOpen(false);
+      // Navigate to dashboard after successful deletion
+      navigate("/dashboard");
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to delete article";
@@ -164,18 +162,18 @@ export default function ArticleSettings({ articleId }: Props) {
           onOpenChange={setRenameDialogOpen}
         />
       </DropdownMenu>
-       <ConfirmDialog
-         open={deleteConfirmOpen}
-         onOpenChange={setDeleteConfirmOpen}
-         title="Delete Article?"
-         description={`Are you sure you want to delete "${article?.title}"? This action cannot be undone.`}
-         confirmText="Delete Article"
-         cancelText="Cancel"
-         isDestructive={true}
-         isLoading={isDeleting}
-         error={deleteError}
-         onConfirm={handleConfirmDelete}
-       />
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title="Delete Article?"
+        description={`Are you sure you want to delete "${article?.title}"? This action cannot be undone.`}
+        confirmText="Delete Article"
+        cancelText="Cancel"
+        isDestructive={true}
+        isLoading={isDeleting}
+        error={deleteError}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }
