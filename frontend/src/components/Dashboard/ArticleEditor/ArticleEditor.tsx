@@ -1,13 +1,13 @@
 import UpgradeProDialog from "@/components/Account/UpgradeProDialog";
 import AnalyticsDashboard from "@/components/Dashboard/AnalyticsDashboard/AnalyticsDashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSaveArticle } from "@/hooks/useSaveArticle";
 import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
 import type { Article } from "@/types/article";
 import MDEditor from "@uiw/react-md-editor";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import { toast } from "sonner";
 import "./ArticleEditor.css";
 
 type Props = {
@@ -19,12 +19,17 @@ export default function ArticleEditor({
   article,
   initialTab = "editor",
 }: Props) {
-  const { updateArticleContent, saveChanges, unsavedChanges } = useArticle();
+  const { updateArticleContent } = useArticle();
   const user = useUser((state) => state.user);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [activeTab, setActiveTab] = useState(initialTab);
+
+  const { handleSave } = useSaveArticle({
+    navigateToNewId: true,
+    activeTab,
+  });
 
   const handleContentChange = (content: string) => {
     updateArticleContent(article.id, content);
@@ -43,50 +48,16 @@ export default function ArticleEditor({
     navigate(`?${newParams.toString()}`, { replace: true });
   };
 
-  const handleSave = useCallback(async () => {
-    // Check if there are unsaved changes for this article
-    if (!unsavedChanges[article.id]) {
-      toast.error("No changes to save");
-      return;
-    }
-
-    try {
-      const result = await saveChanges(article.id);
-      if (result.error) {
-        toast.error(result.error);
-        return;
-      }
-
-      toast.success("Changes saved successfully");
-
-      // If a temporary article was saved, navigate to the new permanent ID
-      if (result.id && result.id !== article.id) {
-        const newParams = new URLSearchParams(searchParams);
-        if (activeTab) newParams.set("tab", activeTab);
-        navigate(`/dashboard/articles/${result.id}?${newParams.toString()}`, {
-          replace: true,
-        });
-      }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to save changes";
-      toast.error(errorMessage);
-    }
-  }, [
-    article.id,
-    unsavedChanges,
-    saveChanges,
-    navigate,
-    searchParams,
-    activeTab,
-  ]);
+  const handleSaveClick = useCallback(async () => {
+    await handleSave(article.id);
+  }, [handleSave, article.id]);
 
   // Used to handle save on CTRL+S
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "s") {
         e.preventDefault();
-        handleSave();
+        handleSaveClick();
       }
     };
 
@@ -94,7 +65,7 @@ export default function ArticleEditor({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [handleSave]);
+  }, [handleSaveClick]);
 
   return (
     <main className="h-screen w-screen p-2.5">

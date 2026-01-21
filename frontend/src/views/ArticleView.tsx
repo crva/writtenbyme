@@ -28,17 +28,15 @@ export default function ArticleView() {
     initAuth();
   }, [checkAuth]);
 
-  // Fetch articles when authenticated
-  useEffect(() => {
-    if (isInitialized && isAuthenticated) {
-      // Avoid refetching when editing a temporary article to prevent it disappearing
-      if (!articleId || articleId.startsWith("temp-")) return;
-      // Fetch only once per session; stops loops when list is empty
-      if (!hasFetched) {
-        fetchArticles();
-      }
-    }
-  }, [isInitialized, isAuthenticated, fetchArticles, articleId, hasFetched]);
+   // Fetch articles when authenticated
+   useEffect(() => {
+     if (isInitialized && isAuthenticated) {
+       // Fetch only once per session; stops loops when list is empty
+       if (!hasFetched) {
+         fetchArticles();
+       }
+     }
+   }, [isInitialized, isAuthenticated, fetchArticles, hasFetched]);
 
   // Set selected article when component mounts or articleId changes
   useEffect(() => {

@@ -35,8 +35,19 @@ export default function ConfirmDialog({
   error,
   onConfirm,
 }: ConfirmDialogProps) {
+  const handleConfirm = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // Prevent the dialog from closing automatically
+    e.preventDefault();
+    onConfirm();
+  };
+
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog open={open} onOpenChange={(newOpen) => {
+      // Prevent closing while loading
+      if (!isLoading) {
+        onOpenChange(newOpen);
+      }
+    }}>
       <AlertDialogContent onClick={(e) => e.stopPropagation()}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
@@ -48,7 +59,7 @@ export default function ConfirmDialog({
             {cancelText}
           </AlertDialogCancel>
           <AlertDialogAction
-            onClick={onConfirm}
+            onClick={handleConfirm}
             disabled={isLoading}
             className={
               isDestructive

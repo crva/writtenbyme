@@ -1,4 +1,3 @@
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import ConfirmDialog from "@/components/ui/confirm-dialog";
 import {
   DropdownMenu,
@@ -14,10 +13,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useSaveArticle } from "@/hooks/useSaveArticle";
 import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
 import {
-  AlertCircle,
   Check,
   Ellipsis,
   ExternalLink,
@@ -33,29 +32,17 @@ type Props = {
 };
 
 export default function ArticleSettings({ articleId }: Props) {
-  const {
-    removeArticle,
-    saveChanges,
-    discardChanges,
-    unsavedChanges,
-    articles,
-  } = useArticle();
+  const { removeArticle, discardChanges, articles, unsavedChanges } = useArticle();
   const { user } = useUser();
+  const { handleSave } = useSaveArticle();
 
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [saveError, setSaveError] = useState<string>("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string>("");
 
   const article = articles.find((a) => a.id === articleId);
   const hasUnsavedChanges = unsavedChanges[articleId] !== undefined;
-
-  const handleSave = async () => {
-    setSaveError("");
-    const result = await saveChanges(articleId);
-    if (result.error) {
-      setSaveError(result.error);
-    }
-  };
 
   const handleDiscard = () => {
     discardChanges(articleId);
@@ -65,9 +52,19 @@ export default function ArticleSettings({ articleId }: Props) {
     setDeleteConfirmOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    removeArticle(articleId);
-    setDeleteConfirmOpen(false);
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    setDeleteError("");
+    try {
+      await removeArticle(articleId);
+      setDeleteConfirmOpen(false);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to delete article";
+      setDeleteError(errorMessage);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleView = () => {
@@ -82,12 +79,6 @@ export default function ArticleSettings({ articleId }: Props) {
 
   return (
     <div className="space-y-2">
-      {saveError && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{saveError}</AlertDescription>
-        </Alert>
-      )}
       <DropdownMenu>
         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
           <div className="p-1 rounded">
@@ -101,7 +92,7 @@ export default function ArticleSettings({ articleId }: Props) {
                 <DropdownMenuItem
                   onClick={(e) => {
                     stopPropagation(e);
-                    handleSave();
+                    handleSave(articleId);
                   }}
                 >
                   <Check className="size-4 text-green-500" />
@@ -173,16 +164,18 @@ export default function ArticleSettings({ articleId }: Props) {
           onOpenChange={setRenameDialogOpen}
         />
       </DropdownMenu>
-      <ConfirmDialog
-        open={deleteConfirmOpen}
-        onOpenChange={setDeleteConfirmOpen}
-        title="Delete Article?"
-        description={`Are you sure you want to delete "${article?.title}"? This action cannot be undone.`}
-        confirmText="Delete Article"
-        cancelText="Cancel"
-        isDestructive={true}
-        onConfirm={handleConfirmDelete}
-      />
+       <ConfirmDialog
+         open={deleteConfirmOpen}
+         onOpenChange={setDeleteConfirmOpen}
+         title="Delete Article?"
+         description={`Are you sure you want to delete "${article?.title}"? This action cannot be undone.`}
+         confirmText="Delete Article"
+         cancelText="Cancel"
+         isDestructive={true}
+         isLoading={isDeleting}
+         error={deleteError}
+         onConfirm={handleConfirmDelete}
+       />
     </div>
   );
 }

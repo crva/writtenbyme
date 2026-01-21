@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { useArticle } from "@/stores/articleStore";
 import { AlertCircle } from "lucide-react";
 import { useRef, useState } from "react";
@@ -15,7 +16,7 @@ import { useRef, useState } from "react";
 interface NewArticleDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: (title: string) => void;
+  onConfirm: (title: string) => Promise<void>;
 }
 
 export default function NewArticleDialog({
@@ -26,9 +27,10 @@ export default function NewArticleDialog({
   const { articles } = useArticle();
   const [title, setTitle] = useState("");
   const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     setError("");
     if (!title.trim()) {
       return;
@@ -44,14 +46,23 @@ export default function NewArticleDialog({
       return;
     }
 
-    onConfirm(title.trim());
-    setTitle("");
-    setError("");
-    onOpenChange(false);
+    setIsLoading(true);
+    try {
+      await onConfirm(title.trim());
+      setTitle("");
+      setError("");
+      onOpenChange(false);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to create article"
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !isLoading) {
       handleConfirm();
     }
   };
@@ -87,13 +98,15 @@ export default function NewArticleDialog({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onKeyDown={handleKeyDown}
+            disabled={isLoading}
           />
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => handleOpenChange(false)}>
+            <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={isLoading}>
               Cancel
             </Button>
-            <Button onClick={handleConfirm} disabled={!title.trim()}>
-              Create
+            <Button onClick={handleConfirm} disabled={!title.trim() || isLoading}>
+              {isLoading && <Spinner className="mr-2" />}
+              {isLoading ? "Creating..." : "Create"}
             </Button>
           </div>
         </div>

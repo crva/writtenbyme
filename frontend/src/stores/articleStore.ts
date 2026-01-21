@@ -15,12 +15,16 @@ type ArticleStore = {
   selectedArticleId: string | null;
   unsavedChanges: Record<string, string>;
   originalContent: Record<string, string>;
-  newArticles: Set<string>; // Track temporary IDs of articles not yet saved to API
   currentArticle: Article | null;
   loading: boolean;
   hasFetched: boolean;
-  addArticle: (title: string) => void;
-  removeArticle: (id: string) => void;
+  addArticle: (title: string) => Promise<{
+    error?: string;
+    success?: boolean;
+    id?: string;
+    slug?: string;
+  }>;
+  removeArticle: (id: string) => Promise<void>;
   updateArticleContent: (id: string, content: string) => void;
   updateArticleTitle: (id: string, title: string) => void;
   setSelectedArticle: (id: string | null) => void;
@@ -38,60 +42,50 @@ type ArticleStore = {
   resetStore: () => void;
 };
 
-/**
- * Generate a temporary ID for new articles
- * Format: temp-{timestamp}-{random}
- */
-function generateTempId(): string {
-  return `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-}
 
 export const useArticle = create<ArticleStore>((set, get) => ({
   articles: [],
   selectedArticleId: null,
   unsavedChanges: {},
   originalContent: {},
-  newArticles: new Set(),
   currentArticle: null,
   loading: false,
   hasFetched: false,
 
-  addArticle: (title: string) =>
-    set((state) => {
-      const tempId = generateTempId();
-      const newArticles = new Set(state.newArticles);
-      newArticles.add(tempId);
+  addArticle: async (title: string) => {
+    try {
+      const response = await createArticle({
+        title: title,
+        content: "",
+      });
 
-      return {
-        articles: [
-          ...state.articles,
-          {
-            id: tempId,
-            title: title,
-            content: "",
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-        ],
-        newArticles,
+      const newArticle = {
+        id: response.article.id,
+        title: response.article.title,
+        content: response.article.content,
+        slug: response.article.slug,
+        createdAt: response.article.createdAt,
+        updatedAt: response.article.updatedAt,
       };
-    }),
 
-  removeArticle: (id: string) =>
-    set((state) => {
-      // Only call API if it's not a temporary article
-      if (!state.newArticles.has(id)) {
-        deleteArticle(id).catch((error) => {
-          const errorMessage =
-            error instanceof Error ? error.message : "Failed to delete article";
-          toast.error(errorMessage);
-        });
-      }
+      set((state) => ({
+        articles: [newArticle, ...state.articles],
+        selectedArticleId: response.article.id,
+      }));
 
-      const newArticles = new Set(state.newArticles);
-      newArticles.delete(id);
+      return { success: true, id: response.article.id, slug: response.article.slug };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create article";
+      toast.error(errorMessage);
+      return { error: errorMessage };
+    }
+  },
 
-      return {
+  removeArticle: async (id: string) => {
+    try {
+      await deleteArticle(id);
+      set((state) => ({
         articles: state.articles.filter((article) => article.id !== id),
         selectedArticleId:
           state.selectedArticleId === id ? null : state.selectedArticleId,
@@ -101,9 +95,13 @@ export const useArticle = create<ArticleStore>((set, get) => ({
         originalContent: Object.fromEntries(
           Object.entries(state.originalContent).filter(([key]) => key !== id),
         ),
-        newArticles,
-      };
-    }),
+      }));
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to delete article";
+      throw new Error(errorMessage);
+    }
+  },
 
   updateArticleContent: (id: string | number, content: string) =>
     set((state) => {
@@ -148,87 +146,35 @@ export const useArticle = create<ArticleStore>((set, get) => ({
         return { error: "Article not found" };
       }
 
-      if (state.newArticles.has(id)) {
-        // Create new article
-        const response = await createArticle({
-          title: article.title,
-          content: article.content,
-        });
+      // Update existing article
+      const response = await updateArticle(String(article.id), {
+        title: article.title,
+        content: article.content,
+      });
 
-        // Replace temporary ID with real API ID
-        const realId = response.article.id;
-        set((currentState) => {
-          const newArticles = new Set(currentState.newArticles);
-          newArticles.delete(id);
-
-          // Replace the temporary ID with the real ID in all records
-          const updatedArticles = currentState.articles.map((a) =>
-            a.id === id
-              ? {
-                  ...a,
-                  id: realId,
-                  title: response.article.title,
-                  slug: response.article.slug,
-                  content: response.article.content,
-                }
-              : a,
-          );
-
-          const updatedUnsavedChanges = Object.fromEntries(
-            Object.entries(currentState.unsavedChanges).filter(
-              ([key]) => key !== id,
-            ),
-          );
-
-          const updatedOriginalContent = Object.fromEntries(
-            Object.entries(currentState.originalContent).filter(
-              ([key]) => key !== id,
-            ),
-          );
-
-          return {
-            articles: updatedArticles,
-            selectedArticleId:
-              currentState.selectedArticleId === id
-                ? realId
-                : currentState.selectedArticleId,
-            unsavedChanges: updatedUnsavedChanges,
-            originalContent: updatedOriginalContent,
-            newArticles,
-          };
-        });
-        return { success: true, id: realId, slug: response.article.slug };
-      } else {
-        // Update existing article
-        const response = await updateArticle(String(article.id), {
-          title: article.title,
-          content: article.content,
-        });
-
-        set((currentState) => ({
-          articles: currentState.articles.map((a) =>
-            a.id === id
-              ? {
-                  ...a,
-                  title: response.article.title,
-                  slug: response.article.slug,
-                  content: response.article.content,
-                }
-              : a,
+      set((currentState) => ({
+        articles: currentState.articles.map((a) =>
+          a.id === id
+            ? {
+                ...a,
+                title: response.article.title,
+                slug: response.article.slug,
+                content: response.article.content,
+              }
+            : a,
+        ),
+        unsavedChanges: Object.fromEntries(
+          Object.entries(currentState.unsavedChanges).filter(
+            ([key]) => key !== id,
           ),
-          unsavedChanges: Object.fromEntries(
-            Object.entries(currentState.unsavedChanges).filter(
-              ([key]) => key !== id,
-            ),
+        ),
+        originalContent: Object.fromEntries(
+          Object.entries(currentState.originalContent).filter(
+            ([key]) => key !== id,
           ),
-          originalContent: Object.fromEntries(
-            Object.entries(currentState.originalContent).filter(
-              ([key]) => key !== id,
-            ),
-          ),
-        }));
-        return { success: true, id, slug: response.article.slug };
-      }
+        ),
+      }));
+      return { success: true, id, slug: response.article.slug };
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to save article";
@@ -269,18 +215,10 @@ export const useArticle = create<ArticleStore>((set, get) => ({
         ? response
         : response.articles || [];
 
-      // Merge fetched articles with any temporary articles in the store
-      set((currentState) => {
-        const tempArticles = currentState.articles.filter((a) =>
-          currentState.newArticles.has(a.id),
-        );
-
-        return {
-          articles: [...fetched, ...tempArticles],
-          newArticles: new Set(currentState.newArticles),
-          loading: false,
-          hasFetched: true,
-        };
+      set({
+        articles: fetched,
+        loading: false,
+        hasFetched: true,
       });
     } catch {
       toast.error("Failed to fetch articles");
@@ -343,7 +281,6 @@ export const useArticle = create<ArticleStore>((set, get) => ({
       selectedArticleId: null,
       unsavedChanges: {},
       originalContent: {},
-      newArticles: new Set(),
       currentArticle: null,
       loading: false,
       hasFetched: false,

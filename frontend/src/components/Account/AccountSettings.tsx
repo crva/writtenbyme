@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
 import { Trash2 } from "lucide-react";
@@ -160,15 +161,19 @@ export default function AccountSettings({
                   Permanently delete your account and all associated data
                 </p>
               </div>
-              <Button
-                variant="destructive"
-                onClick={() => setDeleteConfirmOpen(true)}
-                className="w-full gap-2"
-                disabled={isDeleting}
-              >
-                <Trash2 className="h-4 w-4" />
-                Delete Account
-              </Button>
+               <Button
+                 variant="destructive"
+                 onClick={() => setDeleteConfirmOpen(true)}
+                 className="w-full gap-2"
+                 disabled={isDeleting}
+               >
+                 {isDeleting ? (
+                   <Spinner className="mr-1" />
+                 ) : (
+                   <Trash2 className="h-4 w-4" />
+                 )}
+                 {isDeleting ? "Deleting..." : "Delete Account"}
+               </Button>
             </div>
 
             {/* Legal Links */}

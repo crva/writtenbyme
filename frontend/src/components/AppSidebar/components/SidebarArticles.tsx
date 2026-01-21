@@ -48,9 +48,14 @@ export default function SidebarArticles() {
     setDialogOpen(true);
   };
 
-  const handleNewArticle = (title: string) => {
-    addArticle(title);
-    setDialogOpen(false);
+  const handleNewArticle = async (title: string) => {
+    const result = await addArticle(title);
+    if (!result.error && result.id) {
+      setDialogOpen(false);
+      // Navigate to the new article
+      const tab = searchParams.get("tab") || "editor";
+      navigate(`/dashboard/articles/${result.id}?tab=${tab}`);
+    }
   };
 
   return (

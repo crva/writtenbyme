@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { useArticle } from "@/stores/articleStore";
 import { AlertCircle } from "lucide-react";
 import { useState } from "react";
@@ -28,6 +29,7 @@ export default function ArticleRenameDialog({
   const article = articles.find((a) => a.id === articleId);
   const [newTitle, setNewTitle] = useState(article?.title || "");
   const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleRename = async () => {
     setError("");
@@ -47,12 +49,17 @@ export default function ArticleRenameDialog({
       return;
     }
 
-    updateArticleTitle(articleId, newTitle);
-    const result = await saveChanges(articleId);
-    if (result.error) {
-      setError(result.error);
-    } else {
-      onOpenChange(false);
+    setIsLoading(true);
+    try {
+      updateArticleTitle(articleId, newTitle);
+      const result = await saveChanges(articleId);
+      if (result.error) {
+        setError(result.error);
+      } else {
+        onOpenChange(false);
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -99,10 +106,13 @@ export default function ArticleRenameDialog({
           />
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
             Cancel
           </Button>
-          <Button onClick={handleRename}>Rename</Button>
+          <Button onClick={handleRename} disabled={isLoading}>
+            {isLoading && <Spinner className="mr-2" />}
+            {isLoading ? "Renaming..." : "Rename"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
