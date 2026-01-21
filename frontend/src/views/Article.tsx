@@ -1,4 +1,5 @@
 import { PageLayout } from "@/components/PageContent";
+import { trackArticleView } from "@/lib/analyticsApi";
 import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
 import MDEditor from "@uiw/react-md-editor";
@@ -58,65 +59,53 @@ export default function Article() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [currentArticle]);
 
-  // Track view when user leaves the page
-  useEffect(() => {
-    if (!currentArticle) return;
+   // Track view when user leaves the page
+   useEffect(() => {
+     if (!currentArticle) return;
 
-    const handleBeforeUnload = () => {
-      if (sessionStartTime.current) {
-        const sessionDuration = Math.round(
-          (Date.now() - sessionStartTime.current) / 1000,
-        );
-        if (sessionDuration > 0) {
-          const params = new URLSearchParams();
-          params.append("sessionDuration", sessionDuration.toString());
-          params.append(
-            "maxScrollPercentage",
-            Math.round(maxScrollPercentageRef.current).toString(),
-          );
-          const apiUrl =
-            import.meta.env.VITE_API_URL || "http://localhost:3001/api";
+     const handleBeforeUnload = () => {
+       if (sessionStartTime.current) {
+         const sessionDuration = Math.round(
+           (Date.now() - sessionStartTime.current) / 1000,
+         );
+         if (sessionDuration > 0) {
+           // Use sendBeacon for page unload - it's designed for this
+           const params = new URLSearchParams();
+           params.append("sessionDuration", sessionDuration.toString());
+           params.append(
+             "maxScrollPercentage",
+             Math.round(maxScrollPercentageRef.current).toString(),
+           );
+           navigator.sendBeacon(
+             `${import.meta.env.VITE_API_URL || "http://localhost:3001"}/articles/${currentArticle.id}/track`,
+             params,
+           );
+         }
+       }
+     };
 
-          // Use sendBeacon for page unload - it's designed for this
-          navigator.sendBeacon(
-            `${apiUrl}/articles/${currentArticle.id}/track`,
-            params,
-          );
-        }
-      }
-    };
+     // Also track when navigating away via component cleanup
+     const cleanup = () => {
+       if (sessionStartTime.current) {
+         const sessionDuration = Math.round(
+           (Date.now() - sessionStartTime.current) / 1000,
+         );
+         if (sessionDuration > 0) {
+           trackArticleView(
+             currentArticle.id,
+             sessionDuration,
+             Math.round(maxScrollPercentageRef.current),
+           );
+         }
+       }
+     };
 
-    // Also track when navigating away via component cleanup
-    const cleanup = () => {
-      if (sessionStartTime.current) {
-        const sessionDuration = Math.round(
-          (Date.now() - sessionStartTime.current) / 1000,
-        );
-        if (sessionDuration > 0) {
-          const params = new URLSearchParams();
-          params.append("sessionDuration", sessionDuration.toString());
-          params.append(
-            "maxScrollPercentage",
-            Math.round(maxScrollPercentageRef.current).toString(),
-          );
-          const apiUrl =
-            import.meta.env.VITE_API_URL || "http://localhost:3001/api";
-
-          fetch(`${apiUrl}/articles/${currentArticle.id}/track`, {
-            method: "POST",
-            body: params,
-            keepalive: true,
-          }).catch(() => {});
-        }
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      cleanup();
-    };
-  }, [currentArticle]);
+     window.addEventListener("beforeunload", handleBeforeUnload);
+     return () => {
+       window.removeEventListener("beforeunload", handleBeforeUnload);
+       cleanup();
+     };
+   }, [currentArticle]);
 
    return (
      <PageLayout
