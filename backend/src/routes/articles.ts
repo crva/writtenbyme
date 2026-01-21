@@ -8,7 +8,7 @@ const router = Router();
 // Rate limit for article mutations (create, update, delete)
 const articleMutationLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 5, // 5 requests per minute
+  max: 10, // 10 requests per minute
   message: "Too many article operations. Please try again later",
   standardHeaders: true,
   legacyHeaders: false,
