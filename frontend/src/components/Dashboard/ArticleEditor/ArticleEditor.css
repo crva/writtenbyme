@@ -41,3 +41,10 @@
 .article-editor .wmde-markdown {
   background: rgb(var(--tw-color-gray-900));
 }
+
+/* Hide comment button in toolbar */
+.article-editor
+  .w-md-editor-toolbar
+  li:has(button[title="Insert comment (ctrl + /)"]) {
+  display: none;
+}
