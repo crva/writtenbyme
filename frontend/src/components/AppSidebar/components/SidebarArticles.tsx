@@ -1,6 +1,7 @@
 import UpgradeProDialog from "@/components/Account/UpgradeProDialog";
 import {
   SidebarGroup,
+  SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
@@ -11,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { usePaidUser } from "@/hooks/usePaidUser";
 import { useArticle } from "@/stores/articleStore";
 import { useUser } from "@/stores/userStore";
-import { Newspaper, PlusCircle } from "lucide-react";
+import { Newspaper, Plus } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import ArticleSettings from "./ArticleSettings";
@@ -71,22 +72,16 @@ export default function SidebarArticles() {
       />
       <SidebarGroup>
         <SidebarGroupLabel>Articles</SidebarGroupLabel>
+        {user && (
+          <SidebarGroupAction
+            onClick={() => handleNewArticleClick()}
+            title="New article"
+          >
+            <Plus className="size-4 text-muted-foreground cursor-pointer" />
+          </SidebarGroupAction>
+        )}
         <SidebarGroupContent>
           <SidebarMenu>
-            {user && (
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  className="text-muted-foreground"
-                  onClick={() => handleNewArticleClick()}
-                >
-                  <div className={`cursor-pointer`} onClick={() => {}}>
-                    <PlusCircle />
-                    <span>New article</span>
-                  </div>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            )}
             {loading && articles.length === 0 ? (
               <>
                 {[1, 2, 3].map((i) => (
